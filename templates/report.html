@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Build Report — {{ app_name }}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0; padding: 0; background: #f8f9fa; color: #212529;
+    }
+    header {
+      background: #343a40; color: #fff; padding: 1.5rem 2rem;
+    }
+    header h1 { margin: 0 0 .25rem; font-size: 1.6rem; }
+    header p  { margin: 0; opacity: .75; font-size: .9rem; }
+    .badge {
+      display: inline-block; padding: .25em .6em; border-radius: .35rem;
+      font-size: .85rem; font-weight: 600; color: #fff;
+    }
+    .badge-success { background: #28a745; }
+    .badge-danger  { background: #dc3545; }
+    .badge-warning { background: #ffc107; color: #212529; }
+    .badge-info    { background: #17a2b8; }
+    main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+    .card {
+      background: #fff; border: 1px solid #dee2e6; border-radius: .5rem;
+      margin-bottom: 1.5rem; overflow: hidden;
+    }
+    .card-header {
+      background: #e9ecef; padding: .75rem 1.25rem;
+      font-weight: 600; cursor: pointer; user-select: none;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-header:hover { background: #dee2e6; }
+    .card-body { padding: 1.25rem; }
+    .card-body.collapsed { display: none; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    .stat { text-align: center; padding: 1rem; background: #f8f9fa; border-radius: .4rem; }
+    .stat-value { font-size: 2rem; font-weight: 700; color: #0d6efd; }
+    .stat-label { font-size: .8rem; color: #6c757d; text-transform: uppercase; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th, td { border: 1px solid #dee2e6; padding: .45rem .75rem; text-align: left; }
+    th { background: #f4f6f8; font-weight: 600; }
+    tr:nth-child(even) { background: #f8f9fa; }
+    .text-success { color: #28a745; }
+    .text-danger  { color: #dc3545; }
+    .text-muted   { color: #6c757d; }
+    code { background: #f4f4f4; padding: .1em .4em; border-radius: .2rem; font-size: .85em; }
+    ul.list-plain { list-style: none; padding: 0; margin: 0; }
+    ul.list-plain li { padding: .25rem 0; border-bottom: 1px solid #f0f0f0; }
+    .toggle-icon { font-size: .8rem; }
+    #file-filter { width: 100%; padding: .5rem; margin-bottom: .75rem;
+                   border: 1px solid #ced4da; border-radius: .3rem; font-size: .9rem; }
+    .progress-bar-wrap { background: #e9ecef; border-radius: .3rem; height: 12px; }
+    .progress-bar { background: #28a745; height: 100%; border-radius: .3rem;
+                    transition: width .3s ease; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>
+    Build Report — {{ app_name }}
+    <span class="badge badge-{{ status_class }}">{{ status }}</span>
+  </h1>
+  <p>
+    {{ app_version }} ({{ build_number }}) &nbsp;·&nbsp;
+    {{ start_time }} &nbsp;·&nbsp;
+    Duration: {{ duration_human }} &nbsp;·&nbsp;
+    OS: {{ platform_os }} &nbsp;·&nbsp;
+    Flutter: {{ flutter_version }}
+  </p>
+</header>
+
+<main>
+
+  <!-- Summary stats -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      📊 Summary <span class="toggle-icon">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-3">
+        <div class="stat">
+          <div class="stat-value">{{ total_files }}</div>
+          <div class="stat-label">Files Tracked</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">{{ total_mb }} MB</div>
+          <div class="stat-label">Total Size</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value {{ 'text-success' if manifest_ok else 'text-danger' }}">
+            {{ '100%' if manifest_ok else 'MISMATCH' }}
+          </div>
+          <div class="stat-label">Manifest Coverage</div>
+        </div>
+      </div>
+
+      {% if not manifest_ok %}
+      <p class="text-danger" style="margin-top:1rem">
+        ⚠ Manifest mismatch: {{ total_files }} tracked vs {{ filesystem_count }} on disk.
+      </p>
+      {% endif %}
+
+      <h3 style="margin-top:1.25rem">File Types</h3>
+      <table>
+        <tr><th>Type</th><th>Count</th></tr>
+        {% for ftype, count in file_type_counts.items() %}
+        <tr><td>{{ ftype }}</td><td>{{ count }}</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+
+  <!-- Artifacts -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      📦 Artifacts <span class="toggle-icon">▼</span>
+    </div>
+    <div class="card-body">
+      {% if artifacts %}
+      <table>
+        <tr><th>Type</th><th>Path</th></tr>
+        {% for k, v in artifacts.items() %}
+        <tr><td>{{ k | upper }}</td><td><code>{{ v }}</code></td></tr>
+        {% endfor %}
+      </table>
+      {% else %}
+      <p class="text-muted">No artifacts produced.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Errors & Warnings -->
+  {% if errors %}
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)" style="background:#f8d7da">
+      ❌ Errors ({{ errors | length }}) <span class="toggle-icon">▼</span>
+    </div>
+    <div class="card-body">
+      <ul class="list-plain">
+        {% for e in errors %}
+        <li class="text-danger">{{ e }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if warnings %}
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)" style="background:#fff3cd">
+      ⚠ Warnings ({{ warnings | length }}) <span class="toggle-icon">▼</span>
+    </div>
+    <div class="card-body">
+      <ul class="list-plain">
+        {% for w in warnings %}
+        <li>{{ w }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Validation -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      ✅ Validation <span class="toggle-icon">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2">
+        <div>
+          <h4>Pre-Build
+            <span class="badge badge-{{ 'success' if validation.pre_build.passed else 'danger' }}">
+              {{ 'PASS' if validation.pre_build.passed else 'FAIL' }}
+            </span>
+          </h4>
+          {% if validation.pre_build.errors %}
+          <ul class="list-plain">
+            {% for e in validation.pre_build.errors %}<li class="text-danger">{{ e }}</li>{% endfor %}
+          </ul>
+          {% else %}<p class="text-success">No errors</p>{% endif %}
+        </div>
+        <div>
+          <h4>Post-Build
+            <span class="badge badge-{{ 'success' if validation.post_build.passed else 'danger' }}">
+              {{ 'PASS' if validation.post_build.passed else 'FAIL' }}
+            </span>
+          </h4>
+          {% if validation.post_build.errors %}
+          <ul class="list-plain">
+            {% for e in validation.post_build.errors %}<li class="text-danger">{{ e }}</li>{% endfor %}
+          </ul>
+          {% else %}<p class="text-success">No errors</p>{% endif %}
+        </div>
+      </div>
+
+      {% if validation.pre_build.details.environment %}
+      <h4 style="margin-top:1rem">Environment</h4>
+      <table>
+        <tr><th>Tool</th><th>Installed</th><th>Version</th></tr>
+        {% for name, info in validation.pre_build.details.environment.items() %}
+        <tr>
+          <td>{{ name }}</td>
+          <td class="{{ 'text-success' if info.installed else 'text-danger' }}">
+            {{ '✔' if info.installed else '✘' }}
+          </td>
+          <td>{{ info.version }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Asset Report -->
+  {% if asset_report %}
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      🎨 Assets <span class="toggle-icon">▼</span>
+    </div>
+    <div class="card-body">
+      <p><b>Referenced:</b> {{ asset_report.referenced_assets }}</p>
+      {% if asset_report.missing_assets %}
+      <p class="text-danger"><b>Missing:</b> {{ asset_report.missing_assets | length }}</p>
+      <ul class="list-plain">
+        {% for m in asset_report.missing_assets %}<li class="text-danger">{{ m }}</li>{% endfor %}
+      </ul>
+      {% else %}
+      <p class="text-success">All referenced assets present ✔</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Repositories -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      📁 Repositories <span class="toggle-icon">▼</span>
+    </div>
+    <div class="card-body">
+      <ul class="list-plain">
+        {% for repo in repos %}<li>{{ repo }}</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- File Manifest -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      📋 File Manifest ({{ files | length }} files) <span class="toggle-icon">▼</span>
+    </div>
+    <div class="card-body collapsed" id="manifest-body">
+      <input id="file-filter" type="text" placeholder="Filter by path or repo…" oninput="filterFiles()"/>
+      <p class="text-muted" style="font-size:.8rem">
+        Showing first 5 000 files. Full list in <code>file_manifest.json</code>.
+      </p>
+      <table id="file-table">
+        <thead>
+          <tr><th>Path</th><th>Repo</th><th>Type</th><th>Size (B)</th><th>SHA-256</th></tr>
+        </thead>
+        <tbody>
+          {% for f in files[:5000] %}
+          <tr>
+            <td><code>{{ f.path }}</code></td>
+            <td>{{ f.repo }}</td>
+            <td>{{ f.type }}</td>
+            <td>{{ f.size }}</td>
+            <td><code style="font-size:.7rem">{{ f.sha256[:12] }}…</code></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script>
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const icon = header.querySelector('.toggle-icon');
+  body.classList.toggle('collapsed');
+  icon.textContent = body.classList.contains('collapsed') ? '▶' : '▼';
+}
+
+function filterFiles() {
+  const q = document.getElementById('file-filter').value.toLowerCase();
+  const rows = document.querySelectorAll('#file-table tbody tr');
+  rows.forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// Open manifest section by default when it's the active concern
+document.addEventListener('DOMContentLoaded', function() {
+  // Card bodies start open (non-collapsed) except the file manifest
+  // which is large — it starts collapsed and user clicks to open
+});
+</script>
+
+</body>
+</html>

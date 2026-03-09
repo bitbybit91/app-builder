@@ -1,0 +1,122 @@
+# ==============================================================================
+#  app_builder configuration
+#  Autonomous Flutter/Dart mobile app build system
+#  Pre-configured for the AgoraDesk / LocalMonero ecosystem.
+#  Change values as needed for your own project.
+# ==============================================================================
+
+# ── Source repositories ────────────────────────────────────────────────────────
+repos:
+  # Main Flutter application
+  - url: https://github.com/AgoraDesk-LocalMonero/agoradesk-app-foss
+    branch: main
+    type: main_app          # main_app | dependency | tool
+    local_name: agoradesk-app-foss
+
+  # Flutter package dependencies (will be wired via local path: references)
+  - url: https://github.com/AgoraDesk-LocalMonero/flutter-pin-code-widget
+    branch: main
+    type: dependency
+    local_name: flutter-pin-code-widget
+    package_name: pin_code_widget      # must match pubspec.yaml name
+
+  - url: https://github.com/AgoraDesk-LocalMonero/insta-image-viewer
+    branch: main
+    type: dependency
+    local_name: insta-image-viewer
+    package_name: insta_image_viewer
+
+  # Build / locale tools (cloned but not wired as path: deps)
+  - url: https://github.com/AgoraDesk-LocalMonero/dart-json-arb-json-converter
+    branch: main
+    type: tool
+    local_name: dart-json-arb-json-converter
+
+  - url: https://github.com/AgoraDesk-LocalMonero/dart-update-locales-fastlane
+    branch: main
+    type: tool
+    local_name: dart-update-locales-fastlane
+
+# ── App metadata ───────────────────────────────────────────────────────────────
+app:
+  name: AgoraDesk
+  bundle_id: com.agoradesk.app          # Android applicationId / iOS bundle id
+  version: 1.0.0
+  build_number: 1
+  description: "AgoraDesk — non-custodial peer-to-peer crypto exchange"
+
+# ── Android configuration ──────────────────────────────────────────────────────
+android:
+  min_sdk_version: 21
+  target_sdk_version: 34
+  compile_sdk_version: 34
+  # Signing (leave blank to skip signing — unsigned build only)
+  keystore_path: ""          # absolute path to .jks / .keystore file
+  keystore_alias: ""
+  keystore_password: ""
+  key_password: ""
+  # Extra permissions added to AndroidManifest.xml (in addition to app defaults)
+  extra_permissions:
+    - android.permission.INTERNET
+    - android.permission.ACCESS_NETWORK_STATE
+    - android.permission.CAMERA
+    - android.permission.READ_EXTERNAL_STORAGE
+    - android.permission.WRITE_EXTERNAL_STORAGE
+  # ProGuard / R8 — set true to enable minification
+  enable_proguard: false
+  # Multidex — automatically enabled when minSdk < 21 or forced here
+  enable_multidex: true
+
+# ── iOS configuration ──────────────────────────────────────────────────────────
+ios:
+  # Leave blank if not building for iOS or if you want unsigned output
+  team_id: ""
+  provisioning_profile: ""   # name of provisioning profile in Xcode
+  signing_identity: ""       # e.g. "iPhone Distribution: Your Name (XXXXXXXX)"
+  deployment_target: "13.0"
+  # Entitlements / capabilities (list of strings matching Xcode capability keys)
+  capabilities:
+    - push_notifications
+  export_method: app-store   # app-store | ad-hoc | enterprise | development
+
+# ── Build options ──────────────────────────────────────────────────────────────
+build:
+  mode: release              # release | debug | profile
+  output_dir: ./output       # where final artifacts are placed
+  clean_before_build: true   # run `flutter clean` before building
+  build_android: true
+  build_ios: true            # auto-skipped when not on macOS
+  # Dart defines passed to flutter build (--dart-define=KEY=VALUE)
+  dart_defines: {}
+  # Extra flutter build flags
+  extra_flutter_flags: []
+
+# ── Fastlane ───────────────────────────────────────────────────────────────────
+fastlane:
+  enabled: false             # set true to generate Fastlane config files
+  android_package: com.agoradesk.app
+  ios_app_identifier: com.agoradesk.app
+  # Google Play JSON key file for automated deployment
+  google_play_json_key: ""
+  # App Store Connect API key details
+  app_store_connect_key_id: ""
+  app_store_connect_issuer_id: ""
+  app_store_connect_key_filepath: ""
+
+# ── Environment requirements ───────────────────────────────────────────────────
+environment:
+  flutter_min_version: "3.10.0"
+  java_min_version: "11"
+  xcode_min_version: "14.0"   # macOS only
+  ruby_min_version: "2.7"
+  # Number of retry attempts for network / subprocess operations
+  max_retries: 3
+  retry_delay_seconds: 5
+  # Subprocess timeout in seconds
+  subprocess_timeout: 600
+
+# ── Logging ────────────────────────────────────────────────────────────────────
+logging:
+  level: INFO                # DEBUG | INFO | WARNING | ERROR
+  log_file: build.log        # relative to output_dir
+  colored_console: true
