@@ -50,7 +50,11 @@ def warn(msg):
 
 
 def run(cmd, cwd=None, env=None, stdin_data=None, check=False):
-    """Run command list (no shell) or string (shell=True).  Returns CompletedProcess."""
+    """Run command list (no shell) or string (shell=True).  Returns CompletedProcess.
+
+    SECURITY: Prefer list form to avoid shell injection.  When a string is
+    passed it must be a hardcoded literal — never build it from external input.
+    """
     kwargs = dict(capture_output=True, text=True)
     if cwd:
         kwargs["cwd"] = cwd
@@ -3231,10 +3235,10 @@ def post_build():
     run([COMPOSER, "run-script", "post-autoload-dump", "--no-interaction"],
         cwd=APP_ROOT, env=env)
 
-    # Ownership and permissions
+    # Ownership and permissions (list-based to avoid shell injection)
     run(["chown", "-R", "www-data:www-data", APP_ROOT])
-    run(f"find {APP_ROOT} -type f -exec chmod 644 {{}} +", cwd=APP_ROOT)
-    run(f"find {APP_ROOT} -type d -exec chmod 755 {{}} +", cwd=APP_ROOT)
+    run(["find", APP_ROOT, "-type", "f", "-exec", "chmod", "644", "{}", "+"])
+    run(["find", APP_ROOT, "-type", "d", "-exec", "chmod", "755", "{}", "+"])
     run(["chmod", "-R", "775",
          f"{APP_ROOT}/storage",
          f"{APP_ROOT}/bootstrap/cache"])
