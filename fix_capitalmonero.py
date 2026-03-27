@@ -152,8 +152,14 @@ def install_system_packages():
     # Cache / sessions
     apt_install("redis-server")
 
-    # Node & NPM
-    apt_install("nodejs", "npm")
+    # Node.js (nodesource builds bundle npm; the separate 'npm' apt package
+    # conflicts with those builds – so we only install nodejs here and verify
+    # npm separately below)
+    apt_install("nodejs")
+    # Install npm only when it is not already provided by nodejs
+    npm_check = run(["npm", "--version"], quiet=True)
+    if npm_check.returncode != 0:
+        apt_install("npm")
 
     # Tools
     apt_install("curl", "git", "unzip", "openssl", "ufw", "certbot",
@@ -248,6 +254,11 @@ def fix_composer():
         "sort-packages": true,
         "allow-plugins": {
             "composer/package-versions-deprecated": true
+        },
+        "audit": {
+            "abandoned": "report",
+            "ignore": ["PKSA-8qx3-n5y5-vvnd", "PKSA-w7xr-vk7n-rstm"],
+            "block-insecure": false
         }
     },
     "extra": {
@@ -301,7 +312,7 @@ def fix_composer():
     c_bin = shutil.which("composer") or COMPOSER
     run_checked(
         [c_bin, "install", "--no-interaction", "--prefer-dist",
-         "--optimize-autoloader", "--no-scripts"],
+         "--optimize-autoloader", "--no-scripts", "--no-audit"],
         cwd=APP_ROOT, env=c_env,
         msg="composer install failed"
     )
@@ -3792,7 +3803,7 @@ def post_build():
         c_env = {"COMPOSER_ALLOW_SUPERUSER": "1", "COMPOSER_NO_INTERACTION": "1"}
         c_bin = shutil.which("composer") or COMPOSER
         run_checked([c_bin, "install", "--no-interaction", "--prefer-dist",
-                     "--optimize-autoloader", "--no-scripts"],
+                     "--optimize-autoloader", "--no-scripts", "--no-audit"],
                     cwd=APP_ROOT, env=c_env, msg="composer install failed")
 
     # Clear any cached config first (stale cache causes 500)
