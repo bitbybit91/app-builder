@@ -20,8 +20,8 @@ import tempfile
 # ---------------------------------------------------------------------------
 
 APP_DIR = "/var/www/capitalmonero"
-DOMAIN  = "capitalmonero.local"
-TOR_ONION = ""            # fill in if known, e.g. "abc123.onion"
+DOMAIN  = "capitalmonero.com"
+TOR_ONION = "fae6oumbrz6drrjkwhuidvckur47eg2v64jlinrv3wutshb2sc7k2tqd.onion"
 DB_NAME = "capitalmonero"
 DB_USER = "capitalmonero"
 
@@ -1687,14 +1687,202 @@ return [
 """
     write_file(f"{APP_DIR}/config/sanctum.php", sanctum_config)
 
-    # Copy remaining config files from vendor if available
-    for cfg in ["broadcasting", "filesystems", "hashing", "mail", "queue"]:
-        src = f"{APP_DIR}/vendor/laravel/framework/src/Illuminate/Foundation/Application.php"
-        vendor_cfg = f"{APP_DIR}/vendor/laravel/laravel/config/{cfg}.php"
-        dst = f"{APP_DIR}/config/{cfg}.php"
-        if os.path.isfile(vendor_cfg) and not os.path.isfile(dst):
-            shutil.copy(vendor_cfg, dst)
-            print(f"  copied {dst}")
+    # Remaining config files written directly (not copied from vendor)
+    broadcasting_config = r"""<?php
+
+return [
+    'default' => env('BROADCAST_DRIVER', 'null'),
+    'connections' => [
+        'pusher' => [
+            'driver' => 'pusher',
+            'key' => env('PUSHER_APP_KEY'),
+            'secret' => env('PUSHER_APP_SECRET'),
+            'app_id' => env('PUSHER_APP_ID'),
+            'options' => [
+                'host' => env('PUSHER_HOST') ?: 'api-'.env('PUSHER_APP_CLUSTER', 'mt1').'.pusher.com',
+                'port' => env('PUSHER_PORT', 443),
+                'scheme' => env('PUSHER_SCHEME', 'https'),
+                'encrypted' => true,
+                'useTLS' => env('PUSHER_SCHEME', 'https') === 'https',
+            ],
+            'client_options' => [],
+        ],
+        'ably' => [
+            'driver' => 'ably',
+            'key' => env('ABLY_KEY'),
+        ],
+        'redis' => [
+            'driver' => 'redis',
+            'connection' => 'default',
+        ],
+        'log' => ['driver' => 'log'],
+        'null' => ['driver' => 'null'],
+    ],
+];
+"""
+    write_file(f"{APP_DIR}/config/broadcasting.php", broadcasting_config)
+
+    filesystems_config = r"""<?php
+
+return [
+    'default' => env('FILESYSTEM_DISK', 'local'),
+    'disks' => [
+        'local' => [
+            'driver' => 'local',
+            'root' => storage_path('app'),
+            'throw' => false,
+        ],
+        'public' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+        's3' => [
+            'driver' => 's3',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_BUCKET'),
+            'url' => env('AWS_URL'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'throw' => false,
+        ],
+    ],
+    'links' => [
+        public_path('storage') => storage_path('app/public'),
+    ],
+];
+"""
+    write_file(f"{APP_DIR}/config/filesystems.php", filesystems_config)
+
+    hashing_config = r"""<?php
+
+return [
+    'driver' => 'bcrypt',
+    'bcrypt' => ['rounds' => env('BCRYPT_ROUNDS', 10)],
+    'argon' => [
+        'memory' => 65536,
+        'threads' => 1,
+        'time' => 4,
+    ],
+];
+"""
+    write_file(f"{APP_DIR}/config/hashing.php", hashing_config)
+
+    mail_config = r"""<?php
+
+return [
+    'default' => env('MAIL_MAILER', 'smtp'),
+    'mailers' => [
+        'smtp' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
+            'port' => env('MAIL_PORT', 587),
+            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+            'username' => env('MAIL_USERNAME'),
+            'password' => env('MAIL_PASSWORD'),
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN'),
+        ],
+        'ses' => ['transport' => 'ses'],
+        'mailgun' => ['transport' => 'mailgun'],
+        'postmark' => ['transport' => 'postmark'],
+        'sendmail' => [
+            'transport' => 'sendmail',
+            'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
+        ],
+        'log' => [
+            'transport' => 'log',
+            'channel' => env('MAIL_LOG_CHANNEL'),
+        ],
+        'array' => ['transport' => 'array'],
+        'failover' => [
+            'transport' => 'failover',
+            'mailers' => ['smtp', 'log'],
+        ],
+    ],
+    'from' => [
+        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+        'name' => env('MAIL_FROM_NAME', 'Example'),
+    ],
+    'markdown' => [
+        'theme' => 'default',
+        'paths' => [resource_path('views/vendor/mail')],
+    ],
+];
+"""
+    write_file(f"{APP_DIR}/config/mail.php", mail_config)
+
+    queue_config = r"""<?php
+
+return [
+    'default' => env('QUEUE_CONNECTION', 'sync'),
+    'connections' => [
+        'sync' => ['driver' => 'sync'],
+        'database' => [
+            'driver' => 'database',
+            'table' => 'jobs',
+            'queue' => 'default',
+            'retry_after' => 90,
+            'after_commit' => false,
+        ],
+        'beanstalkd' => [
+            'driver' => 'beanstalkd',
+            'host' => 'localhost',
+            'queue' => 'default',
+            'retry_after' => 90,
+            'block_for' => 0,
+            'after_commit' => false,
+        ],
+        'sqs' => [
+            'driver' => 'sqs',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'prefix' => env('SQS_PREFIX', 'https://sqs.us-east-1.amazonaws.com/your-account-id'),
+            'queue' => env('SQS_QUEUE', 'default'),
+            'suffix' => env('SQS_SUFFIX'),
+            'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+            'after_commit' => false,
+        ],
+        'redis' => [
+            'driver' => 'redis',
+            'connection' => 'default',
+            'queue' => env('REDIS_QUEUE', 'default'),
+            'retry_after' => 90,
+            'block_for' => null,
+            'after_commit' => false,
+        ],
+    ],
+    'failed' => [
+        'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
+        'database' => env('DB_CONNECTION', 'mysql'),
+        'table' => 'failed_jobs',
+    ],
+];
+"""
+    write_file(f"{APP_DIR}/config/queue.php", queue_config)
+
+    services_config = r"""<?php
+
+return [
+    'mailgun' => [
+        'domain' => env('MAILGUN_DOMAIN'),
+        'secret' => env('MAILGUN_SECRET'),
+        'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+        'scheme' => 'https',
+    ],
+    'postmark' => ['token' => env('POSTMARK_TOKEN')],
+    'ses' => [
+        'key' => env('AWS_ACCESS_KEY_ID'),
+        'secret' => env('AWS_SECRET_ACCESS_KEY'),
+        'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+    ],
+];
+"""
+    write_file(f"{APP_DIR}/config/services.php", services_config)
 
     # -----------------------------------------------------------------------
     # Bootstrap
@@ -1794,6 +1982,31 @@ $kernel->terminate($request, $response);
 
     robots_txt = "User-agent: *\nDisallow: /admin\n"
     write_file(f"{APP_DIR}/public/robots.txt", robots_txt)
+
+    # -----------------------------------------------------------------------
+    # Artisan CLI entry point
+    # -----------------------------------------------------------------------
+    artisan = r"""#!/usr/bin/env php
+<?php
+
+define('LARAVEL_START', microtime(true));
+
+require __DIR__.'/vendor/autoload.php';
+
+$app = require_once __DIR__.'/bootstrap/app.php';
+
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+
+$status = $kernel->handle(
+    $input = new Symfony\Component\Console\Input\ArgvInput,
+    new Symfony\Component\Console\Output\ConsoleOutput
+);
+
+$kernel->terminate($input, $status);
+
+exit($status);
+"""
+    write_file(f"{APP_DIR}/artisan", artisan, mode=0o755)
 
     # -----------------------------------------------------------------------
     # Storage .gitignore files
@@ -2315,7 +2528,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         User::firstOrCreate(
-            ['email' => 'admin@capitalmonero.local'],
+            ['email' => 'admin@capitalmonero.com'],
             [
                 'name'     => 'Admin',
                 'password' => Hash::make('changeme123!'),
@@ -2378,9 +2591,28 @@ def phase8_verify():
         ok = run_ok(f"ss -tlnp | grep -q :{port}")
         results[f"port {port}"] = "✓ listening" if ok else "✗ not listening"
 
-    ok = run_ok(
-        f"mysql -u {DB_USER} -e 'SELECT 1' {DB_NAME} 2>/dev/null"
+    # Read db password from credentials.json for the connectivity check
+    creds_path = f"{APP_DIR}/credentials.json"
+    db_pass = ""
+    if os.path.isfile(creds_path):
+        try:
+            with open(creds_path) as fh:
+                db_pass = json.load(fh).get("db_password", "")
+        except Exception:
+            pass
+    # Use a temporary defaults file to avoid exposing the password in the process list
+    _defaults_file = tempfile.NamedTemporaryFile(
+        mode="w", suffix=".cnf", delete=False, prefix="mysql_check_"
     )
+    try:
+        _defaults_file.write(f"[client]\npassword={db_pass}\n")
+        _defaults_file.close()
+        os.chmod(_defaults_file.name, 0o600)
+        ok = run_ok(
+            f"mysql --defaults-extra-file={_defaults_file.name} -u {DB_USER} -e 'SELECT 1' {DB_NAME} 2>/dev/null"
+        )
+    finally:
+        os.unlink(_defaults_file.name)
     results["db connectivity"] = "✓ ok" if ok else "✗ failed"
 
     ok = run_ok("redis-cli ping 2>/dev/null | grep -q PONG")
@@ -2393,7 +2625,7 @@ def phase8_verify():
     print("\n  Phase 8 complete.")
     print("\n=== Setup Complete ===")
     print(f"  URL: https://{DOMAIN}")
-    print(f"  Admin: admin@capitalmonero.local / changeme123!")
+    print(f"  Admin: admin@capitalmonero.com / changeme123!")
     print("  Please change the admin password immediately after first login.")
 
 
