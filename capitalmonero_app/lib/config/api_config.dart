@@ -6,13 +6,13 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   // Auth
-  static const String login = '/auth/login';
-  static const String register = '/auth/register';
-  static const String logout = '/auth/logout';
-  static const String user = '/auth/user';
-  static const String twoFactorVerify = '/auth/2fa/verify';
-  static const String twoFactorEnable = '/auth/2fa/enable';
-  static const String twoFactorDisable = '/auth/2fa/disable';
+  static const String login = '/login';
+  static const String register = '/register';
+  static const String logout = '/logout';
+  static const String user = '/user';
+  static const String twoFactorVerify = '/2fa/verify';
+  static const String twoFactorEnable = '/2fa/enable';
+  static const String twoFactorDisable = '/2fa/disable';
 
   // Offers
   static const String offers = '/offers';
