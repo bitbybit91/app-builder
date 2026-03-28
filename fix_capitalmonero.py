@@ -1,4 +1,4 @@
-import subprocess, os, sys, secrets, string, json
+import subprocess, os, sys, secrets, string, json, base64
 from pathlib import Path
 from datetime import datetime
 
@@ -51,7 +51,7 @@ def phase1_database():
         Path(sql_file).unlink()
     except Exception:
         pass
-    app_key = "base64:" + secrets.token_urlsafe(32)
+    app_key = "base64:" + base64.b64encode(secrets.token_bytes(32)).decode()
     monero_pass = gen_password(16)
     env_lines = [
         "APP_NAME=CapitalMonero",
@@ -885,9 +885,13 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
-        'name', 'username', 'email', 'password', 'two_factor_secret',
-        'two_factor_enabled', 'is_admin', 'is_banned', 'banned_reason',
-        'pgp_key', 'telegram', 'trade_count', 'positive_feedback', 'negative_feedback',
+        'name', 'username', 'email', 'password', 'role', 'is_active',
+        'two_factor_secret', 'two_factor_enabled',
+        'btc_balance', 'xmr_balance', 'ltc_balance', 'eth_balance',
+        'escrow_btc', 'escrow_xmr', 'escrow_ltc', 'escrow_eth',
+        'btc_deposit_address', 'xmr_deposit_address', 'ltc_deposit_address', 'eth_deposit_address',
+        'completed_trades', 'rating', 'bio', 'avatar', 'country', 'preferred_currency',
+        'login_attempts', 'locked_until', 'last_seen_at',
     ];
 
     protected $hidden = ['password', 'remember_token', 'two_factor_secret'];
@@ -1081,7 +1085,7 @@ class Wallet extends Model
 
     public function getAvailableBalanceAttribute()
     {
-        return max('0', bcsub((string)$this->balance, (string)$this->locked_balance, 12));
+        return max(0.0, (float)bcsub((string)$this->balance, (string)$this->locked_balance, 12));
     }
 }
 """)
@@ -1097,7 +1101,7 @@ class Message extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['trade_id', 'user_id', 'content', 'is_system', 'is_file', 'file_path'];
+    protected $fillable = ['sender_id', 'receiver_id', 'trade_id', 'body', 'is_read', 'read_at'];
 
     protected $casts = [
         'is_system' => 'boolean',
@@ -1525,10 +1529,10 @@ class TradeController extends Controller
         ]);
 
         Message::create([
-            'trade_id'  => $trade->id,
-            'user_id'   => Auth::id(),
-            'content'   => 'Trade started.',
-            'is_system' => true,
+            'trade_id'    => $trade->id,
+            'sender_id'   => Auth::id(),
+            'receiver_id' => $trade->seller_id,
+            'body'        => 'Trade started.',
         ]);
 
         return redirect()->route('trades.show', $trade)->with('success', 'Trade initiated!');
@@ -1552,10 +1556,10 @@ class TradeController extends Controller
         }
         $trade->update(['status' => Trade::STATUS_PAID, 'payment_sent_at' => now()]);
         Message::create([
-            'trade_id'  => $trade->id,
-            'user_id'   => Auth::id(),
-            'content'   => 'Buyer has marked payment as sent.',
-            'is_system' => true,
+            'trade_id'    => $trade->id,
+            'sender_id'   => Auth::id(),
+            'receiver_id' => $trade->seller_id,
+            'body'        => 'Buyer has marked payment as sent.',
         ]);
         return back()->with('success', 'Payment marked as sent.');
     }
@@ -1573,10 +1577,10 @@ class TradeController extends Controller
         $trade->buyer->increment('trade_count');
         $trade->seller->increment('trade_count');
         Message::create([
-            'trade_id'  => $trade->id,
-            'user_id'   => Auth::id(),
-            'content'   => 'Trade completed. XMR released to buyer.',
-            'is_system' => true,
+            'trade_id'    => $trade->id,
+            'sender_id'   => Auth::id(),
+            'receiver_id' => $trade->buyer_id,
+            'body'        => 'Trade completed. Crypto released to buyer.',
         ]);
         return back()->with('success', 'Trade completed successfully.');
     }
@@ -1589,10 +1593,10 @@ class TradeController extends Controller
         }
         $trade->update(['status' => Trade::STATUS_CANCELLED, 'cancelled_at' => now()]);
         Message::create([
-            'trade_id'  => $trade->id,
-            'user_id'   => Auth::id(),
-            'content'   => 'Trade has been cancelled.',
-            'is_system' => true,
+            'trade_id'    => $trade->id,
+            'sender_id'   => Auth::id(),
+            'receiver_id' => Auth::id() === $trade->buyer_id ? $trade->seller_id : $trade->buyer_id,
+            'body'        => 'Trade has been cancelled.',
         ]);
         return back()->with('success', 'Trade cancelled.');
     }
@@ -1613,10 +1617,10 @@ class TradeController extends Controller
             'status'    => 'open',
         ]);
         Message::create([
-            'trade_id'  => $trade->id,
-            'user_id'   => Auth::id(),
-            'content'   => 'A dispute has been opened.',
-            'is_system' => true,
+            'trade_id'    => $trade->id,
+            'sender_id'   => Auth::id(),
+            'receiver_id' => Auth::id() === $trade->buyer_id ? $trade->seller_id : $trade->buyer_id,
+            'body'        => 'A dispute has been opened.',
         ]);
         return back()->with('success', 'Dispute opened. An admin will review.');
     }
@@ -3761,7 +3765,7 @@ footer a:hover { color: var(--accent); }
             @if(in_array($trade->status, ['pending', 'funded', 'payment_sent']))
             <form method="POST" action="{{ route('messages.store', $trade) }}" class="mt-2" style="display:flex;gap:0.5rem">
                 @csrf
-                <input type="text" name="content" class="form-control" placeholder="Type a message..." required>
+                <input type="text" name="body" class="form-control" placeholder="Type a message..." required>
                 <button type="submit" class="btn btn-primary">Send</button>
             </form>
             @endif
