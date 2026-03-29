@@ -70,8 +70,15 @@ class Validator
         return $this;
     }
 
+    private const ALLOWED_TABLES = ['users', 'trades', 'trade_responses', 'messages', 'contact_messages'];
+    private const ALLOWED_COLUMNS = ['username', 'email', 'id'];
+
     public function unique(string $field, string $label, string $table, string $column): self
     {
+        if (!in_array($table, self::ALLOWED_TABLES, true) || !in_array($column, self::ALLOWED_COLUMNS, true)) {
+            throw new \InvalidArgumentException('Invalid table or column for unique validation.');
+        }
+
         $value = trim($_POST[$field] ?? '');
         if ($value !== '') {
             $stmt = Database::query(

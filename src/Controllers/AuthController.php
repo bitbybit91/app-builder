@@ -101,7 +101,9 @@ class AuthController
     public function logout(): void
     {
         Auth::logout();
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $_SESSION['flash_success'] = 'You have been logged out.';
         header('Location: /');
         exit;
