@@ -1,0 +1,11 @@
+# Tor configuration for Magoradesk hidden service
+# This file is a template — setup-tor-hidden-service.sh writes the final
+# version to /etc/tor/torrc after substituting __HIDDEN_SERVICE_DIR__
+# and __HIDDEN_SERVICE_PORT__.
+
+SocksPort 0
+Log notice file /var/log/tor/notices.log
+RunAsDaemon 1
+
+HiddenServiceDir __HIDDEN_SERVICE_DIR__
+HiddenServicePort __HIDDEN_SERVICE_PORT__ 127.0.0.1:80

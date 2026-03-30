@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="300">
+<title>Magoradesk &mdash; APK Download</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem}
+  .card{background:#1e293b;border-radius:1rem;padding:2rem;max-width:520px;width:100%;box-shadow:0 25px 50px rgba(0,0,0,.5)}
+  .logo{font-size:2rem;margin-bottom:.25rem}
+  h1{font-size:1.75rem;font-weight:700;color:#f8fafc}
+  .subtitle{color:#94a3b8;margin-bottom:1.5rem;font-size:.95rem}
+  .badge{display:inline-block;background:#1d4ed8;color:#bfdbfe;font-size:.75rem;font-weight:600;padding:.25rem .75rem;border-radius:9999px;margin-bottom:1.5rem;text-transform:uppercase;letter-spacing:.05em}
+  .badge.onion{background:#6b21a8;color:#e9d5ff}
+  .meta{background:#0f172a;border-radius:.5rem;padding:1rem;display:grid;gap:.5rem;margin-bottom:1.5rem}
+  .meta-row{display:flex;justify-content:space-between;font-size:.875rem}
+  .meta-label{color:#64748b}
+  .meta-value{color:#cbd5e1;font-weight:500}
+  .download-btn{display:block;text-align:center;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;text-decoration:none;font-size:1.1rem;font-weight:700;padding:.9rem 2rem;border-radius:.75rem;margin-bottom:1rem;transition:opacity .2s}
+  .download-btn:hover{opacity:.9}
+  .builds-section{margin-top:1.5rem}
+  .builds-section h2{font-size:.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
+  .build-item{background:#0f172a;border-radius:.5rem;padding:.75rem 1rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+  .build-name{font-size:.8rem;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+  .build-dl{font-size:.8rem;color:#60a5fa;text-decoration:none;white-space:nowrap}
+  .build-dl:hover{color:#93c5fd}
+  .no-builds{text-align:center;color:#475569;font-size:.875rem;padding:1rem}
+  .footer{margin-top:1.5rem;text-align:center;font-size:.75rem;color:#334155}
+  .footer a{color:#475569}
+  .refresh-note{font-size:.7rem;color:#334155;text-align:center;margin-top:.5rem}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">📱</div>
+  <h1>Magoradesk</h1>
+  <p class="subtitle">P2P Cryptocurrency Trading App</p>
+  <span class="badge onion">🧅 Tor Hidden Service</span>
+
+  <div class="meta">
+    <div class="meta-row">
+      <span class="meta-label">Latest Build</span>
+      <span class="meta-value" id="build-date">&mdash;</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">File Size</span>
+      <span class="meta-value" id="build-size">&mdash;</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">Build Type</span>
+      <span class="meta-value" id="build-type">Debug</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">Min Android</span>
+      <span class="meta-value">7.0 (API 24+)</span>
+    </div>
+  </div>
+
+  <a class="download-btn" href="/builds/" id="download-link">⬇ Download APK</a>
+
+  <div class="builds-section">
+    <h2>Available Builds</h2>
+    <div id="builds-list">
+      <div class="no-builds">No builds available yet. Run setup-vps.sh to generate APKs.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Magoradesk Build Panel &middot;
+    <a href="https://github.com/bitbybit91/app-builder">Source Code</a>
+  </div>
+  <p class="refresh-note">Page auto-refreshes every 5 minutes</p>
+</div>
+</body>
+</html>

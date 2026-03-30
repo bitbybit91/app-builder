@@ -1,0 +1,38 @@
+# Build outputs
+*.apk
+*.aab
+*.ipa
+build/
+output/
+app/build/
+
+# Gradle
+.gradle/
+gradle/wrapper/gradle-wrapper.jar
+local.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets / keys
+*.keystore
+*.jks
+key.properties
+
+# Tor (generated at runtime)
+tor/hostname
+tor/hs_ed25519_secret_key
+tor/hs_ed25519_public_key
+
+# Python
+__pycache__/
+*.pyc
+
+# Logs
+*.log
