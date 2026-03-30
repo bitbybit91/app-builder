@@ -105,7 +105,7 @@ find "$BUILDS_DIR" -maxdepth 1 -name '*.apk' -printf '%T@ %p\n' 2>/dev/null \
 echo "[4/4] Updating download panel..."
 mkdir -p "$SERVE_DIR"
 
-BUILD_DATE=$(date '+%Y-%m-%d %H:%M:%S UTC')
+BUILD_DATE=$(TZ=UTC date '+%Y-%m-%d %H:%M:%S %Z')
 LATEST_APK=$(find "$BUILDS_DIR" -maxdepth 1 -name '*.apk' -printf '%T@ %p\n' 2>/dev/null \
     | sort -rn | head -1 | cut -d' ' -f2-)
 

@@ -211,8 +211,9 @@ else
     echo "     Check: journalctl -u tor"
 fi
 
-PUBLIC_IP=$(curl -s --max-time 5 ifconfig.me 2>/dev/null || echo "YOUR_VPS_IP")
-echo "  🌐 Clear-net panel : http://$PUBLIC_IP  (if port 80 open)"
+echo "  ℹ️  nginx listens on 127.0.0.1:80 (Tor-only by default)."
+echo "     To also expose publicly, change 'listen 127.0.0.1:80' to"
+echo "     'listen 80' in $NGINX_CONF and reload nginx."
 
 if [ -n "${APK_FILENAME:-}" ]; then
     echo "  📱 Latest APK      : $BUILDS_DIR/$APK_FILENAME"
@@ -222,5 +223,5 @@ fi
 
 echo ""
 echo "  Rebuild:  sudo bash build-and-serve.sh"
-echo "  Cron:     0 */6 * * * $(realpath "$REPO_DIR/build-and-serve.sh")"
+echo "  Cron:     0 */6 * * * $(cd "$REPO_DIR" && pwd)/build-and-serve.sh"
 echo "========================================"
