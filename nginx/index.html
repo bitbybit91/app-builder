@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="300">
+<title>Magoradesk — APK Download Panel</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .card {
+    background: #1e293b;
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+  }
+  .logo { font-size: 2rem; margin-bottom: 0.25rem; }
+  h1 { font-size: 1.75rem; font-weight: 700; color: #f8fafc; }
+  .subtitle { color: #94a3b8; margin-bottom: 1.5rem; font-size: 0.95rem; }
+  .badge {
+    display: inline-block;
+    background: #1d4ed8;
+    color: #bfdbfe;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .badge.release { background: #166534; color: #bbf7d0; }
+  .meta {
+    background: #0f172a;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    display: grid;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .meta-row { display: flex; justify-content: space-between; font-size: 0.875rem; }
+  .meta-label { color: #64748b; }
+  .meta-value { color: #cbd5e1; font-weight: 500; }
+  .download-btn {
+    display: block;
+    text-align: center;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 0.9rem 2rem;
+    border-radius: 0.75rem;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-bottom: 1rem;
+  }
+  .download-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .download-btn:active { transform: translateY(0); }
+  .builds-section { margin-top: 1.5rem; }
+  .builds-section h2 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+  }
+  .build-item {
+    background: #0f172a;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .build-info { flex: 1; min-width: 0; }
+  .build-name { font-size: 0.8rem; color: #94a3b8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .build-meta { font-size: 0.7rem; color: #475569; }
+  .build-dl { font-size: 0.8rem; color: #60a5fa; text-decoration: none; white-space: nowrap; }
+  .build-dl:hover { color: #93c5fd; }
+  .no-builds { text-align: center; color: #475569; font-size: 0.875rem; padding: 1rem; }
+  .footer { margin-top: 1.5rem; text-align: center; font-size: 0.75rem; color: #334155; }
+  .footer a { color: #475569; }
+  .refresh-note { font-size: 0.7rem; color: #334155; text-align: center; margin-top: 0.5rem; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">📱</div>
+  <h1>Magoradesk</h1>
+  <p class="subtitle">P2P Cryptocurrency Trading App</p>
+  <span class="badge" id="build-badge">Debug Build</span>
+
+  <div class="meta">
+    <div class="meta-row">
+      <span class="meta-label">Latest Build</span>
+      <span class="meta-value" id="build-date">—</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">File Size</span>
+      <span class="meta-value" id="build-size">—</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">Build Type</span>
+      <span class="meta-value" id="build-type">Debug</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">Min Android</span>
+      <span class="meta-value">7.0 (API 24+)</span>
+    </div>
+  </div>
+
+  <a class="download-btn" href="/builds/" id="download-link">⬇ Download APK</a>
+
+  <div class="builds-section">
+    <h2>Available Builds</h2>
+    <div id="builds-list">
+      <div class="no-builds">No builds available yet. Run setup-vps.sh or build-and-serve.sh to generate APKs.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Magoradesk Build Panel ·
+    <a href="https://github.com/bitbybit91/app-builder">Source Code</a>
+  </div>
+  <p class="refresh-note">Page auto-refreshes every 5 minutes</p>
+</div>
+</body>
+</html>
