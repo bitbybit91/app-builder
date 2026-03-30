@@ -17,9 +17,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Admin wallet address for receiving 4% fee
-        buildConfigField("String", "ADMIN_WALLET_ADDRESS", "\"YOUR_ADMIN_WALLET_ADDRESS_HERE\"")
-        // Admin fee percentage (4%)
+        // Admin fee percentage (4%) - used for display/reference
         buildConfigField("double", "ADMIN_FEE_PERCENTAGE", "0.04")
     }
 
@@ -110,7 +108,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
     // Security / Encryption
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("androidx.security:security-crypto:1.0.0")
 
     // QR Code
     implementation("com.google.zxing:core:3.5.3")

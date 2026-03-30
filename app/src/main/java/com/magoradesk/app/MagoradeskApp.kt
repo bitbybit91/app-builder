@@ -35,6 +35,16 @@ class MagoradeskApp : Application() {
     }
 
     private fun initializeServices() {
+        // Validate admin wallet configuration
+        val unconfigured = AdminWalletConfig.getUnconfiguredWallets()
+        if (unconfigured.isNotEmpty()) {
+            android.util.Log.w(
+                "MagoradeskApp",
+                "Admin wallets not configured for: ${unconfigured.joinToString { it.symbol }}. " +
+                "Fees will not be collected until real wallet addresses are set in Settings."
+            )
+        }
+
         // Initialize admin fee services for all supported cryptocurrencies
         adminFeeServices = AdminWalletConfig.createFeeServices()
 
