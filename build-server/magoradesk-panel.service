@@ -1,0 +1,17 @@
+[Unit]
+Description=Magoradesk APK Build Panel
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/app-builder/build-server/panel-server.py
+WorkingDirectory=/opt/app-builder/build-server
+Restart=always
+RestartSec=5
+User=root
+Environment=ANDROID_HOME=/opt/android-sdk
+Environment=ANDROID_SDK_ROOT=/opt/android-sdk
+Environment=JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+Environment=PATH=/usr/lib/jvm/java-17-openjdk-amd64/bin:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[Install]
+WantedBy=multi-user.target

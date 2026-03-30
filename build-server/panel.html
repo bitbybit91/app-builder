@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Magoradesk Build Server</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0f0f1a;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    header h1 {
+      font-size: 2rem;
+      color: #e94560;
+      letter-spacing: 1px;
+    }
+    header p {
+      color: #888;
+      margin-top: 6px;
+      font-size: 0.9rem;
+    }
+
+    .card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a44;
+      border-radius: 10px;
+      padding: 24px;
+      max-width: 860px;
+      margin: 0 auto 24px;
+    }
+    .card h2 {
+      font-size: 1.1rem;
+      color: #c0c0e0;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #2a2a44;
+      padding-bottom: 8px;
+    }
+
+    /* Build button */
+    #btn-build {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      background: #e94560;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      letter-spacing: 1px;
+    }
+    #btn-build:hover { background: #c73652; }
+    #btn-build:disabled { background: #555; cursor: not-allowed; }
+
+    /* Status badge */
+    #status-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .status-idle    { background: #2a2a44; color: #888; }
+    .status-building { background: #7a4f00; color: #ffd580; }
+    .status-success  { background: #0f4a2e; color: #4caf50; }
+    .status-failure  { background: #4a0f1a; color: #e94560; }
+
+    #status-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    #last-build-ts { color: #666; font-size: 0.85rem; }
+
+    /* Download latest button */
+    #btn-latest {
+      display: inline-block;
+      padding: 8px 20px;
+      background: #16213e;
+      color: #e94560;
+      border: 1px solid #e94560;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    #btn-latest:hover { background: #1e2d56; }
+    #btn-latest.hidden { display: none; }
+
+    /* Builds list */
+    #builds-list { list-style: none; }
+    #builds-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #2a2a44;
+      font-size: 0.9rem;
+    }
+    #builds-list li:last-child { border-bottom: none; }
+    #builds-list a {
+      color: #e94560;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    #builds-list a:hover { text-decoration: underline; }
+    #builds-empty { color: #555; font-style: italic; }
+
+    /* Log */
+    #log-box {
+      background: #0a0a14;
+      border: 1px solid #2a2a44;
+      border-radius: 6px;
+      padding: 12px;
+      height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      color: #a0a0c0;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #ffd580;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🔨 Magoradesk Build Server</h1>
+  <p>Android APK CI Panel</p>
+</header>
+
+<!-- Build trigger card -->
+<div class="card">
+  <h2>Trigger Build</h2>
+  <button id="btn-build" onclick="triggerBuild()">🔨 Build APK</button>
+  <div id="status-row">
+    <span id="status-badge" class="status-idle">Idle</span>
+    <span id="last-build-ts"></span>
+    <a id="btn-latest" class="hidden" href="/builds/magoradesk-debug-latest.apk">⬇ Download Latest</a>
+  </div>
+</div>
+
+<!-- Available builds card -->
+<div class="card">
+  <h2>Available Builds</h2>
+  <ul id="builds-list">
+    <li id="builds-empty">No builds yet.</li>
+  </ul>
+</div>
+
+<!-- Build log card -->
+<div class="card">
+  <h2>Build Log (last 50 lines)</h2>
+  <pre id="log-box">Waiting for first status poll…</pre>
+</div>
+
+<script>
+  let previousBuilding = false;
+
+  async function triggerBuild() {
+    const btn = document.getElementById('btn-build');
+    btn.disabled = true;
+    try {
+      const res = await fetch('/api/build', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        alert('Error: ' + (data.error || res.statusText));
+        btn.disabled = false;
+      }
+      // status polling will update the UI
+    } catch (e) {
+      alert('Network error: ' + e.message);
+      btn.disabled = false;
+    }
+  }
+
+  function setStatus(state) {
+    const badge = document.getElementById('status-badge');
+    badge.className = 'status-' + state;
+    const labels = { idle: 'Idle', building: 'Building…', success: 'Success', failure: 'Failed' };
+    const icons  = { idle: '●', building: '', success: '✔', failure: '✖' };
+    badge.innerHTML = (state === 'building' ? '<span class="spinner"></span>' : '') +
+                      (icons[state] ? icons[state] + ' ' : '') + labels[state];
+  }
+
+  async function pollStatus() {
+    try {
+      const res = await fetch('/api/status');
+      const data = await res.json();
+
+      const state = data.building ? 'building'
+                  : (data.last_result === 'success' ? 'success'
+                  : (data.last_result === 'failure' ? 'failure' : 'idle'));
+      setStatus(state);
+
+      const btn = document.getElementById('btn-build');
+      btn.disabled = data.building;
+
+      const ts = document.getElementById('last-build-ts');
+      ts.textContent = data.last_build ? 'Last build: ' + new Date(data.last_build).toLocaleString() : '';
+
+      const latestBtn = document.getElementById('btn-latest');
+      if (data.apk_url) {
+        latestBtn.href = data.apk_url;
+        latestBtn.classList.remove('hidden');
+      } else {
+        latestBtn.classList.add('hidden');
+      }
+
+      const logBox = document.getElementById('log-box');
+      logBox.textContent = data.log || '(no log yet)';
+      logBox.scrollTop = logBox.scrollHeight;
+
+      // Refresh builds list whenever build state changes
+      if (!data.building && previousBuilding) {
+        await refreshBuilds();
+      }
+      previousBuilding = data.building;
+
+    } catch (e) {
+      console.error('Status poll failed:', e);
+    }
+  }
+
+  async function refreshBuilds() {
+    try {
+      const res = await fetch('/api/builds');
+      const apks = await res.json();
+      const list = document.getElementById('builds-list');
+      const empty = document.getElementById('builds-empty');
+      if (!apks || apks.length === 0) {
+        list.innerHTML = '';
+        list.appendChild(empty);
+        return;
+      }
+      list.innerHTML = '';
+      for (const apk of apks) {
+        const li = document.createElement('li');
+        const name = document.createTextNode(apk);
+        const a = document.createElement('a');
+        a.href = '/builds/' + encodeURIComponent(apk);
+        a.textContent = '⬇ Download';
+        li.appendChild(name);
+        li.appendChild(a);
+        list.appendChild(li);
+      }
+    } catch (e) {
+      console.error('Builds refresh failed:', e);
+    }
+  }
+
+  // Initial load
+  pollStatus();
+  refreshBuilds();
+
+  // Poll every 5 seconds
+  setInterval(pollStatus, 5000);
+</script>
+</body>
+</html>
