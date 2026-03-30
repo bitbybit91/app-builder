@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Magoradesk</string>
+    <string name="app_description">P2P Cryptocurrency Trading</string>
+
+    <!-- Navigation -->
+    <string name="nav_trades">Trades</string>
+    <string name="nav_wallet">Wallet</string>
+    <string name="nav_deposit">Deposit</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Trade -->
+    <string name="create_trade_title">Create Trade</string>
+    <string name="create_trade">Create Trade</string>
+    <string name="hint_amount">Enter amount</string>
+    <string name="select_currency">Select cryptocurrency</string>
+    <string name="trade_fee_notice">A %1$s admin fee is applied to all trades. This fee is automatically deducted and sent to the platform wallet.</string>
+    <string name="fee_preview_example">Example: For 1 BTC trade, fee is %1$s, you receive %2$s</string>
+    <string name="trade_created_with_fee">Trade created. A %1$s admin fee will be applied.</string>
+
+    <!-- Fee -->
+    <string name="fee_breakdown_title">Fee Breakdown (4%% Admin Fee)</string>
+    <string name="admin_fee_amount">Admin Fee: %1$s</string>
+    <string name="net_amount">You Receive: %1$s</string>
+    <string name="admin_fee_placeholder">Admin Fee: --</string>
+    <string name="net_amount_placeholder">You Receive: --</string>
+
+    <!-- Wallet -->
+    <string name="wallet_title">Wallet</string>
+    <string name="wallet_fee_notice">Note: A %1$s admin fee is deducted from all incoming trades and deposits.</string>
+    <string name="bitcoin">Bitcoin (BTC)</string>
+    <string name="monero">Monero (XMR)</string>
+    <string name="litecoin">Litecoin (LTC)</string>
+    <string name="ethereum">Ethereum (ETH)</string>
+    <string name="balance_placeholder">0.00000000</string>
+
+    <!-- Deposit -->
+    <string name="deposit_title">Deposit</string>
+    <string name="deposit">Deposit</string>
+    <string name="hint_deposit_amount">Enter deposit amount</string>
+    <string name="deposit_fee_notice">A %1$s admin fee is applied to all deposits. The fee is automatically deducted from your deposit amount.</string>
+    <string name="deposit_processed">Deposit processed. 4%% admin fee has been deducted.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_fee_info">Platform Fee: %1$s of all trades and deposits are sent to the admin wallet.</string>
+    <string name="admin_wallets_title">Admin Wallet Addresses</string>
+    <string name="hint_btc_wallet">Bitcoin (BTC) Admin Wallet</string>
+    <string name="hint_xmr_wallet">Monero (XMR) Admin Wallet</string>
+    <string name="hint_ltc_wallet">Litecoin (LTC) Admin Wallet</string>
+    <string name="hint_eth_wallet">Ethereum (ETH) Admin Wallet</string>
+    <string name="save_wallets">Save Wallet Addresses</string>
+    <string name="wallets_saved">Admin wallet addresses saved</string>
+    <string name="unconfigured_wallets_warning">Warning: Admin wallets not configured for: %1$s. Fees cannot be collected until wallets are configured.</string>
+
+    <!-- General -->
+    <string name="enter_amount">Please enter an amount</string>
+    <string name="error_generic">An error occurred. Please try again.</string>
+    <string name="loading">Loading…</string>
+</resources>

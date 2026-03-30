@@ -1,0 +1,61 @@
+# Fastlane Configuration for Magoradesk
+# Used for automated app store deployment
+
+default_platform(:android)
+
+platform :android do
+  desc "Run unit tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Build debug APK"
+  lane :build_debug do
+    gradle(
+      task: "assemble",
+      build_type: "Debug"
+    )
+  end
+
+  desc "Build release APK"
+  lane :build_release do
+    gradle(
+      task: "assemble",
+      build_type: "Release"
+    )
+  end
+
+  desc "Build release AAB for Google Play"
+  lane :build_bundle do
+    gradle(
+      task: "bundle",
+      build_type: "Release"
+    )
+  end
+
+  desc "Deploy to Google Play internal track"
+  lane :deploy_internal do
+    build_bundle
+    upload_to_play_store(
+      track: "internal",
+      aab: "app/build/outputs/bundle/release/app-release.aab"
+    )
+  end
+
+  desc "Deploy to Google Play production"
+  lane :deploy_production do
+    build_bundle
+    upload_to_play_store(
+      track: "production",
+      aab: "app/build/outputs/bundle/release/app-release.aab"
+    )
+  end
+
+  desc "Build F-Droid compatible APK"
+  lane :build_fdroid do
+    gradle(
+      task: "assemble",
+      build_type: "Release"
+    )
+  end
+end

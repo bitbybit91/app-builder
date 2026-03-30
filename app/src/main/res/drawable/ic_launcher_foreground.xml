@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Cryptocurrency symbol M -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,70 L34,38 L44,55 L54,38 L54,70 L49,70 L49,52 L44,62 L39,52 L39,70 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M58,70 L58,38 L68,55 L78,38 L78,70 L73,70 L73,52 L68,62 L63,52 L63,70 Z" />
+</vector>

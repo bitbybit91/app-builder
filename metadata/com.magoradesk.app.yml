@@ -1,0 +1,49 @@
+# F-Droid Build Metadata for Magoradesk
+# This file follows the F-Droid metadata format for building and publishing
+# See: https://f-droid.org/docs/Build_Metadata_Reference/
+
+Categories:
+  - Money
+
+License: GPL-3.0-only
+
+AuthorName: Magoradesk
+AuthorEmail: dev@magoradesk.com
+
+WebSite: https://magoradesk.com
+SourceCode: https://github.com/bitbybit91/app-builder
+IssueTracker: https://github.com/bitbybit91/app-builder/issues
+
+Summary: P2P cryptocurrency trading - Buy and sell Bitcoin, Monero, Litecoin & Ethereum
+
+Description: |
+  Magoradesk is a peer-to-peer (P2P) cryptocurrency trading platform that
+  enables users to buy and sell Bitcoin, Monero, Litecoin, and Ethereum
+  directly with other users.
+
+  Key Features:
+  * P2P cryptocurrency trading with multiple payment methods
+  * Support for Bitcoin (BTC), Monero (XMR), Litecoin (LTC), and Ethereum (ETH)
+  * Secure escrow system for safe trading
+  * Built-in wallet management
+  * Easy deposit and withdrawal functionality
+  * Real-time fee transparency (4% platform fee clearly displayed)
+
+  The platform applies a transparent 4% fee on all trades and deposits to
+  sustain platform operations and development.
+
+RepoType: git
+Repo: https://github.com/bitbybit91/app-builder.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: v1.0.0
+    subdir: app
+    gradle:
+      - yes
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1

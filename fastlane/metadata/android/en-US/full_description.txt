@@ -1,0 +1,18 @@
+Magoradesk is a peer-to-peer (P2P) cryptocurrency trading platform that enables
+users to buy and sell Bitcoin, Monero, Litecoin, and Ethereum directly with
+other users.
+
+Key Features:
+• P2P cryptocurrency trading with multiple payment methods
+• Support for Bitcoin (BTC), Monero (XMR), Litecoin (LTC), and Ethereum (ETH)
+• Secure escrow system for safe trading
+• Built-in wallet management
+• Easy deposit and withdrawal functionality
+• Real-time fee transparency (4% platform fee clearly displayed)
+
+The platform applies a transparent 4% fee on all trades and deposits to
+sustain platform operations and development. This fee is clearly displayed
+before every transaction so users always know exactly what they are paying.
+
+Magoradesk prioritizes user privacy and security, supporting privacy-focused
+cryptocurrencies like Monero alongside other popular digital currencies.

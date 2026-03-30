@@ -1,0 +1,11 @@
+v1.0.0 - Initial Release
+
+• P2P cryptocurrency trading for Bitcoin, Monero, Litecoin, and Ethereum
+• Secure escrow system for trade protection
+• Built-in multi-currency wallet
+• Cryptocurrency deposit with real-time fee preview
+• 4% transparent platform fee on all trades and deposits
+• Multiple payment method support
+• QR code support for wallet addresses
+• Dark/Light theme support
+• Material Design 3 UI

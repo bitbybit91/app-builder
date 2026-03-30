@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_trades">
+
+    <fragment
+        android:id="@+id/navigation_trades"
+        android:name="com.magoradesk.app.ui.trade.TradeListFragment"
+        android:label="@string/nav_trades"
+        tools:layout="@layout/fragment_trade_list">
+
+        <action
+            android:id="@+id/action_trades_to_create"
+            app:destination="@id/navigation_create_trade" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_create_trade"
+        android:name="com.magoradesk.app.ui.trade.CreateTradeFragment"
+        android:label="@string/create_trade_title"
+        tools:layout="@layout/fragment_create_trade" />
+
+    <fragment
+        android:id="@+id/navigation_wallet"
+        android:name="com.magoradesk.app.ui.wallet.WalletFragment"
+        android:label="@string/nav_wallet"
+        tools:layout="@layout/fragment_wallet" />
+
+    <fragment
+        android:id="@+id/navigation_deposit"
+        android:name="com.magoradesk.app.ui.deposit.DepositFragment"
+        android:label="@string/nav_deposit"
+        tools:layout="@layout/fragment_deposit" />
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="com.magoradesk.app.ui.settings.SettingsFragment"
+        android:label="@string/nav_settings"
+        tools:layout="@layout/fragment_settings" />
+
+</navigation>

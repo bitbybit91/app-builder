@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/deposit_title"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/text_fee_notice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:background="@color/fee_info_background"
+            android:textColor="@color/fee_info_text"
+            android:textSize="14sp"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/select_currency"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp" />
+
+        <Spinner
+            android:id="@+id/spinner_deposit_currency"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginBottom="16dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp">
+
+            <EditText
+                android:id="@+id/edit_deposit_amount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_deposit_amount"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/fee_info_background"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/fee_breakdown_title"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/text_deposit_fee"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/admin_fee_placeholder"
+                android:textSize="14sp"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/text_deposit_net"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/net_amount_placeholder"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/button_deposit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/deposit"
+            android:textAllCaps="false" />
+
+    </LinearLayout>
+</ScrollView>
