@@ -6,7 +6,10 @@ class PgpService {
   /// Encrypts a message using a simple encryption scheme.
   /// In production, this would use full PGP via pointycastle.
   String encryptMessage(String message, String recipientPublicKey) {
-    final key = utf8.encode(recipientPublicKey.substring(0, 32).padRight(32, '0'));
+    final keyStr = recipientPublicKey.length >= 32
+        ? recipientPublicKey.substring(0, 32)
+        : recipientPublicKey.padRight(32, '0');
+    final key = utf8.encode(keyStr);
     final messageBytes = utf8.encode(message);
     final encrypted = Uint8List(messageBytes.length);
     for (var i = 0; i < messageBytes.length; i++) {
@@ -17,7 +20,10 @@ class PgpService {
 
   /// Decrypts a message.
   String decryptMessage(String encryptedMessage, String privateKey) {
-    final key = utf8.encode(privateKey.substring(0, 32).padRight(32, '0'));
+    final keyStr = privateKey.length >= 32
+        ? privateKey.substring(0, 32)
+        : privateKey.padRight(32, '0');
+    final key = utf8.encode(keyStr);
     final messageBytes = base64Decode(encryptedMessage);
     final decrypted = Uint8List(messageBytes.length);
     for (var i = 0; i < messageBytes.length; i++) {
