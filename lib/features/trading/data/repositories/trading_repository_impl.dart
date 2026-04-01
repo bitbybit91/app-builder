@@ -52,16 +52,12 @@ class TradingRepositoryImpl implements TradingRepository {
 
   @override
   Future<Offer> updateOffer(Offer offer) async {
-    try {
-      return await _remoteDataSource.getOffer(offer.id); // Simplified
-    } on ServerException catch (e) {
-      throw ServerFailure(message: e.message);
-    }
+    throw UnimplementedError('updateOffer not yet implemented');
   }
 
   @override
   Future<void> deleteOffer(String id) async {
-    // Implementation would call delete endpoint
+    throw UnimplementedError('deleteOffer not yet implemented');
   }
 
   @override
@@ -102,10 +98,6 @@ class TradingRepositoryImpl implements TradingRepository {
 
   @override
   Future<void> disputeTrade(String tradeId, String reason) async {
-    try {
-      await _remoteDataSource.updateTradeStatus(tradeId, TradeStatus.disputed);
-    } on ServerException catch (e) {
-      throw ServerFailure(message: e.message);
-    }
+    throw UnimplementedError('disputeTrade not yet implemented');
   }
 }
