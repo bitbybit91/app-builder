@@ -1,0 +1,23 @@
+{
+  "@@locale": "nb",
+  "appTitle": "CapitalMonero",
+  "login": "Logg Inn",
+  "register": "Opprett Konto",
+  "username": "Brukernavn",
+  "password": "Passord",
+  "logout": "Logg Ut",
+  "home": "Hjem",
+  "offers": "Tilbud",
+  "trades": "Handler",
+  "wallet": "Lommebok",
+  "messages": "Meldinger",
+  "notifications": "Varsler",
+  "search": "Søk",
+  "buy": "Kjøp",
+  "sell": "Selg",
+  "balance": "Saldo",
+  "cancel": "Avbryt",
+  "confirm": "Bekreft",
+  "loading": "Laster...",
+  "noResults": "Ingen resultater funnet"
+}

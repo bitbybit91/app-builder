@@ -1,0 +1,23 @@
+{
+  "@@locale": "ko",
+  "appTitle": "CapitalMonero",
+  "login": "로그인",
+  "register": "계정 만들기",
+  "username": "사용자 이름",
+  "password": "비밀번호",
+  "logout": "로그아웃",
+  "home": "홈",
+  "offers": "제안",
+  "trades": "거래",
+  "wallet": "지갑",
+  "messages": "메시지",
+  "notifications": "알림",
+  "search": "검색",
+  "buy": "구매",
+  "sell": "판매",
+  "balance": "잔액",
+  "cancel": "취소",
+  "confirm": "확인",
+  "loading": "로딩 중...",
+  "noResults": "결과 없음"
+}

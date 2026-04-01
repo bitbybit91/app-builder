@@ -1,0 +1,23 @@
+{
+  "@@locale": "sv",
+  "appTitle": "CapitalMonero",
+  "login": "Logga In",
+  "register": "Skapa Konto",
+  "username": "Användarnamn",
+  "password": "Lösenord",
+  "logout": "Logga Ut",
+  "home": "Hem",
+  "offers": "Erbjudanden",
+  "trades": "Affärer",
+  "wallet": "Plånbok",
+  "messages": "Meddelanden",
+  "notifications": "Aviseringar",
+  "search": "Sök",
+  "buy": "Köp",
+  "sell": "Sälj",
+  "balance": "Saldo",
+  "cancel": "Avbryt",
+  "confirm": "Bekräfta",
+  "loading": "Laddar...",
+  "noResults": "Inga resultat hittades"
+}

@@ -1,0 +1,23 @@
+{
+  "@@locale": "zh",
+  "appTitle": "CapitalMonero",
+  "login": "登录",
+  "register": "创建账户",
+  "username": "用户名",
+  "password": "密码",
+  "logout": "退出",
+  "home": "首页",
+  "offers": "报价",
+  "trades": "交易",
+  "wallet": "钱包",
+  "messages": "消息",
+  "notifications": "通知",
+  "search": "搜索",
+  "buy": "购买",
+  "sell": "出售",
+  "balance": "余额",
+  "cancel": "取消",
+  "confirm": "确认",
+  "loading": "加载中...",
+  "noResults": "未找到结果"
+}

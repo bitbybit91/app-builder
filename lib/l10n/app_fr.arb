@@ -1,0 +1,23 @@
+{
+  "@@locale": "fr",
+  "appTitle": "CapitalMonero",
+  "login": "Se Connecter",
+  "register": "Créer un Compte",
+  "username": "Nom d'utilisateur",
+  "password": "Mot de passe",
+  "logout": "Se Déconnecter",
+  "home": "Accueil",
+  "offers": "Offres",
+  "trades": "Échanges",
+  "wallet": "Portefeuille",
+  "messages": "Messages",
+  "notifications": "Notifications",
+  "search": "Rechercher",
+  "buy": "Acheter",
+  "sell": "Vendre",
+  "balance": "Solde",
+  "cancel": "Annuler",
+  "confirm": "Confirmer",
+  "loading": "Chargement...",
+  "noResults": "Aucun résultat trouvé"
+}

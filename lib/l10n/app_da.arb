@@ -1,0 +1,23 @@
+{
+  "@@locale": "da",
+  "appTitle": "CapitalMonero",
+  "login": "Log Ind",
+  "register": "Opret Konto",
+  "username": "Brugernavn",
+  "password": "Adgangskode",
+  "logout": "Log Ud",
+  "home": "Hjem",
+  "offers": "Tilbud",
+  "trades": "Handler",
+  "wallet": "Tegnebog",
+  "messages": "Beskeder",
+  "notifications": "Meddelelser",
+  "search": "Søg",
+  "buy": "Køb",
+  "sell": "Sælg",
+  "balance": "Saldo",
+  "cancel": "Annuller",
+  "confirm": "Bekræft",
+  "loading": "Indlæser...",
+  "noResults": "Ingen resultater fundet"
+}

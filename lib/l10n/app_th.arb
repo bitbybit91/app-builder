@@ -1,0 +1,23 @@
+{
+  "@@locale": "th",
+  "appTitle": "CapitalMonero",
+  "login": "เข้าสู่ระบบ",
+  "register": "สร้างบัญชี",
+  "username": "ชื่อผู้ใช้",
+  "password": "รหัสผ่าน",
+  "logout": "ออกจากระบบ",
+  "home": "หน้าหลัก",
+  "offers": "ข้อเสนอ",
+  "trades": "การซื้อขาย",
+  "wallet": "กระเป๋าเงิน",
+  "messages": "ข้อความ",
+  "notifications": "การแจ้งเตือน",
+  "search": "ค้นหา",
+  "buy": "ซื้อ",
+  "sell": "ขาย",
+  "balance": "ยอดคงเหลือ",
+  "cancel": "ยกเลิก",
+  "confirm": "ยืนยัน",
+  "loading": "กำลังโหลด...",
+  "noResults": "ไม่พบผลลัพธ์"
+}
