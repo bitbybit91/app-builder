@@ -52,7 +52,7 @@ A Python CLI (`app_builder.py`) that automates every step of building a Flutter 
 
 1. Validate environment (Flutter SDK, Android SDK, Xcode, Java, CocoaPods)
 2. Clone multiple Git repositories (main app + dependency packages + tools)
-3. Generate SHA-256 file manifests with 100 % coverage enforcement
+3. Generate SHA-256 file manifests with 100% coverage enforcement
 4. Rewrite `pubspec.yaml` with local `path:` references for dependencies
 5. Run `build_runner`, ARB localization generation, and custom scripts
 6. Validate assets (icons, splash screens, fonts)
@@ -278,7 +278,7 @@ The build system is driven by a single YAML configuration file. Key sections:
 | `repos` | Git repositories to clone | `url`, `branch`, `type` (`main_app` / `dependency` / `tool`), `local_name`, `package_name` |
 | `app` | App metadata | `name`, `bundle_id`, `version`, `build_number` |
 | `android` | Android build config | `min_sdk_version: 21`, `target_sdk_version: 34`, `compile_sdk_version: 34`, keystore paths |
-| `ios` | iOS build config | `team_id`, `provisioning_profile`, `deployment_target: "13.0"`, `export_method` |
+| `ios` | iOS build config | `team_id`, `provisioning_profile`, `deployment_target` (default `"13.0"` in template; CapitalMonero uses `"14.0"`), `export_method` |
 | `build` | Build options | `mode: release`, `output_dir: ./output`, `clean_before_build: true` |
 | `fastlane` | Store deployment | `enabled: false`, `android_package`, `ios_app_identifier`, API key paths |
 | `environment` | Tool version requirements | `flutter_min_version: "3.10.0"`, `java_min_version: "11"`, `xcode_min_version: "14.0"` |
