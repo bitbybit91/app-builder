@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/offer.dart';

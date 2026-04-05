@@ -61,7 +61,19 @@ class OfferCreateRequested extends OffersEvent {
   });
 
   @override
-  List<Object?> get props => [tradeType, offerType, cryptoCurrency, fiatCurrency];
+  List<Object?> get props => [
+        tradeType,
+        offerType,
+        cryptoCurrency,
+        fiatCurrency,
+        paymentMethod,
+        fixedPrice,
+        marketPriceMargin,
+        minAmount,
+        maxAmount,
+        terms,
+        countryCode,
+      ];
 }
 
 class OffersFilterChanged extends OffersEvent {
