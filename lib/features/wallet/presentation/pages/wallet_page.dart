@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_indicator.dart';
+import '../../domain/entities/wallet_balance.dart';
 import '../bloc/wallet_bloc.dart';
 
 class WalletPage extends StatelessWidget {
@@ -152,8 +152,8 @@ class WalletPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBalanceCard(BuildContext context, dynamic balance) {
-    final currency = balance.currency as String;
+  Widget _buildBalanceCard(BuildContext context, WalletBalance balance) {
+    final currency = balance.currency;
     final color = currency == 'XMR' ? AppTheme.xmrColor : AppTheme.btcColor;
     final name = currency == 'XMR' ? 'Monero' : 'Bitcoin';
     return Card(
@@ -272,9 +272,7 @@ class WalletPage extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.copy, size: 18),
-                    onPressed: () {
-                      Clipboard.setData(const ClipboardData(text: ''));
-                    },
+                    onPressed: null,
                   ),
                 ],
               ),
