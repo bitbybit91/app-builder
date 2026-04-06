@@ -87,7 +87,8 @@ def create_app(config_name=None):
                 flash('Username already taken.', 'error')
                 return render_template('register.html')
 
-            password_hash = bcrypt.generate_password_hash(password, rounds=12).decode('utf-8')
+            rounds = app.config.get('BCRYPT_LOG_ROUNDS', 12)
+            password_hash = bcrypt.generate_password_hash(password, rounds=rounds).decode('utf-8')
 
             monero_address = ''
             monero_account_index = 0
@@ -348,6 +349,10 @@ def create_app(config_name=None):
         xmr_price = get_xmr_price(offer['fiat_currency'].lower(), app.config.get('COINGECKO_CACHE_TTL', 300))
         effective_price = xmr_price * (1 + offer['price_margin'] / 100) if xmr_price else 0
         amount_xmr = (amount_fiat / effective_price) if effective_price else 0
+
+        if amount_xmr <= 0:
+            flash('Cannot determine XMR amount: price data unavailable. Please try again.', 'error')
+            return redirect(url_for('offers'))
 
         if offer['offer_type'] == 'sell':
             buyer_id = session['user_id']

@@ -26,6 +26,10 @@ def test_initiate_trade(app, second_user_client):
     assert offer is not None, "Offer should have been created by seller"
     offer_id = offer['id']
 
+    # Seed the coingecko cache so trade initiation can compute amount_xmr
+    import coingecko, time
+    coingecko._cache['xmr_usd'] = (150.0, time.time())
+
     resp = second_user_client.post('/trades/initiate', data={
         'offer_id': str(offer_id),
         'amount_fiat': '100',
@@ -58,6 +62,10 @@ def test_cancel_trade(app):
     offer = db.execute("SELECT id FROM offers WHERE is_active=1 ORDER BY id DESC LIMIT 1").fetchone()
     assert offer, "Offer should exist after seller created it"
     offer_id = offer['id']
+
+    # Seed the coingecko cache so trade initiation can compute amount_xmr
+    import coingecko, time
+    coingecko._cache['xmr_usd'] = (150.0, time.time())
 
     buyer.post('/trades/initiate', data={'offer_id': str(offer_id), 'amount_fiat': '50'})
 

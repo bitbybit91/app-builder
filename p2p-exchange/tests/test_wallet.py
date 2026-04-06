@@ -1,3 +1,6 @@
+_VALID_XMR_ADDR = '44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A'
+
+
 def test_wallet_requires_login(client):
     resp = client.get('/wallet', follow_redirects=False)
     assert resp.status_code == 302
@@ -10,7 +13,7 @@ def test_wallet_page(auth_client):
 
 def test_wallet_withdraw_no_balance(auth_client):
     resp = auth_client.post('/wallet/withdraw', data={
-        'address': '4AdUndXHHZ9pfQj27bTRZqtqSoFNEfNpDRrBAKcgMCTTJmhB5p3p4vqeZ7xGN48w3yF4JVZ9RTCBA',
+        'address': _VALID_XMR_ADDR,
         'amount': '1.0',
     }, follow_redirects=True)
     assert resp.status_code == 200
@@ -18,7 +21,7 @@ def test_wallet_withdraw_no_balance(auth_client):
 
 def test_wallet_withdraw_invalid_amount(auth_client):
     resp = auth_client.post('/wallet/withdraw', data={
-        'address': '4AdUndXHHZ9pfQj27bTRZqtqSoFNEfNpDRrBAKcgMCTTJmhB5p3p4vqeZ7xGN48w3yF4JVZ9RTCBA',
+        'address': _VALID_XMR_ADDR,
         'amount': 'notanumber',
     }, follow_redirects=True)
     assert resp.status_code == 200

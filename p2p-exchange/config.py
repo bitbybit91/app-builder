@@ -12,6 +12,7 @@ class Config:
     MONERO_RPC_USER = os.environ.get('MONERO_RPC_USER', '')
     MONERO_RPC_PASS = os.environ.get('MONERO_RPC_PASS', '')
     COINGECKO_CACHE_TTL = int(os.environ.get('COINGECKO_CACHE_TTL', 300))
+    BCRYPT_LOG_ROUNDS = int(os.environ.get('BCRYPT_LOG_ROUNDS', 12))
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
     WTF_CSRF_ENABLED = False
 
@@ -28,6 +29,7 @@ class TestingConfig(Config):
     SESSION_TYPE = 'null'
     WTF_CSRF_ENABLED = False
     COINGECKO_CACHE_TTL = 300
+    BCRYPT_LOG_ROUNDS = 4  # Faster hashing in tests
 
 config = {
     'development': DevelopmentConfig,
