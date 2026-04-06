@@ -132,7 +132,7 @@ class EscrowService:
 
         except Exception as exc:
             logger.error('Escrow release failed for trade %s: %s', trade.id[:8], exc)
-            return {'success': False, 'tx_hash': '', 'error': str(exc)}
+            return {'success': False, 'tx_hash': '', 'error': 'Transfer failed'}
 
     def refund_escrow(self, trade, refund_address):
         """
@@ -164,7 +164,7 @@ class EscrowService:
 
         except Exception as exc:
             logger.error('Escrow refund failed for trade %s: %s', trade.id[:8], exc)
-            return {'success': False, 'tx_hash': '', 'error': str(exc)}
+            return {'success': False, 'tx_hash': '', 'error': 'Refund failed'}
 
     def open_dispute(self, trade, opened_by_user_id, reason):
         """
@@ -234,7 +234,7 @@ class EscrowService:
 
         except Exception as exc:
             logger.error('Dispute resolution transfer failed: %s', exc)
-            return {'success': False, 'tx_hash': '', 'error': str(exc)}
+            return {'success': False, 'tx_hash': '', 'error': 'Resolution transfer failed'}
 
     def _get_dispute_loser(self, trade):
         """Get the user ID of the dispute loser."""
