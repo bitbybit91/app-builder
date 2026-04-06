@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Browse Offers{% endblock %}
+{% block content %}
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+  <h1>Browse Offers</h1>
+  {% if xmr_price %}<span style="color:var(--muted);">XMR &#8776; ${{ "%.2f"|format(xmr_price) }}</span>{% endif %}
+</div>
+
+<div class="card" style="margin-bottom:1.5rem;">
+  <form method="get" action="/offers" style="display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end;">
+    <div>
+      <label>Type</label>
+      <select name="type" style="width:140px; margin-bottom:0;">
+        <option value="">All</option>
+        <option value="buy" {{ 'selected' if filter_type=='buy' }}>Buy XMR</option>
+        <option value="sell" {{ 'selected' if filter_type=='sell' }}>Sell XMR</option>
+      </select>
+    </div>
+    <div>
+      <label>Currency</label>
+      <input type="text" name="currency" value="{{ filter_currency }}" placeholder="USD" style="width:100px; margin-bottom:0;">
+    </div>
+    <div>
+      <label>Payment Method</label>
+      <input type="text" name="payment_method" value="{{ filter_payment }}" placeholder="Bank..." style="width:180px; margin-bottom:0;">
+    </div>
+    <button type="submit" class="btn btn-secondary">Filter</button>
+    <a href="/offers" class="btn btn-secondary">Clear</a>
+  </form>
+</div>
+
+{% if offers %}
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>Trader</th><th>Type</th><th>Price</th><th>Range</th><th>Payment</th><th></th></tr>
+    </thead>
+    <tbody>
+    {% for offer in offers %}
+    <tr>
+      <td><strong>{{ offer.seller_name }}</strong></td>
+      <td><span class="badge badge-{{ 'success' if offer.offer_type == 'sell' else 'info' }}">{{ offer.offer_type|upper }}</span></td>
+      <td>${{ "%.2f"|format(offer.effective_price) }}<br><small style="color:var(--muted);">{{ "%+.1f"|format(offer.price_margin) }}%</small></td>
+      <td>{{ offer.min_amount }} &ndash; {{ offer.max_amount }} {{ offer.fiat_currency }}</td>
+      <td>{{ offer.payment_method }}</td>
+      <td>
+        {% if session.user_id and session.user_id != offer.user_id %}
+        <form method="post" action="/trades/initiate" style="display:inline; display:flex; gap:0.5rem; align-items:center;">
+          <input type="hidden" name="offer_id" value="{{ offer.id }}">
+          <input type="number" name="amount_fiat" placeholder="Amount {{ offer.fiat_currency }}"
+                 min="{{ offer.min_amount }}" max="{{ offer.max_amount }}" step="0.01" required
+                 style="width:130px; margin-bottom:0;">
+          <button type="submit" class="btn btn-primary btn-sm">Trade</button>
+        </form>
+        {% elif not session.user_id %}
+        <a href="/login" class="btn btn-secondary btn-sm">Login to Trade</a>
+        {% else %}
+        <span style="color:var(--muted); font-size:0.8rem;">Your offer</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card" style="text-align:center; padding:3rem;">
+  <p style="color:var(--muted);">No offers found. <a href="/offers/create">Create the first one!</a></p>
+</div>
+{% endif %}
+{% endblock %}

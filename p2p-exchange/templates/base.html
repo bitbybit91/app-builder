@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}P2P XMR Exchange{% endblock %}</title>
+  <style>
+    :root {
+      --bg: #0d1117; --surface: #161b22; --border: #30363d;
+      --text: #c9d1d9; --muted: #8b949e; --accent: #f97316;
+      --success: #22c55e; --error: #ef4444; --warning: #eab308; --info: #3b82f6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 56px; }
+    nav .brand { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
+    nav .nav-links { display: flex; gap: 1.5rem; flex: 1; }
+    nav .nav-links a { color: var(--text); font-size: 0.9rem; }
+    nav .nav-links a:hover { color: var(--accent); text-decoration: none; }
+    nav .nav-right { margin-left: auto; display: flex; gap: 1rem; align-items: center; font-size: 0.9rem; }
+    .container { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    h1, h2, h3 { color: var(--text); margin-bottom: 1rem; }
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.4rem; }
+    .btn { display: inline-block; padding: 0.5rem 1.25rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: opacity 0.15s; }
+    .btn:hover { opacity: 0.85; text-decoration: none; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--error); color: white; }
+    .btn-secondary { background: var(--border); color: var(--text); }
+    .btn-sm { padding: 0.3rem 0.75rem; font-size: 0.8rem; }
+    input, select, textarea { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 0.5rem 0.75rem; width: 100%; font-size: 0.9rem; margin-bottom: 1rem; }
+    input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+    label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.25rem; }
+    .form-group { margin-bottom: 1rem; }
+    .flash { padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; }
+    .flash-success { background: #052e16; border: 1px solid var(--success); color: var(--success); }
+    .flash-error { background: #2d1515; border: 1px solid var(--error); color: var(--error); }
+    .flash-warning { background: #2d2000; border: 1px solid var(--warning); color: var(--warning); }
+    .flash-info { background: #0d1f3c; border: 1px solid var(--info); color: var(--info); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    th { color: var(--muted); font-weight: 500; }
+    tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 500; }
+    .badge-success { background: #052e16; color: var(--success); }
+    .badge-warning { background: #2d2000; color: var(--warning); }
+    .badge-error { background: #2d1515; color: var(--error); }
+    .badge-info { background: #0d1f3c; color: var(--info); }
+    .badge-muted { background: var(--border); color: var(--muted); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+    .stat-card .stat-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.25rem; }
+    .stat-card .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text); }
+    .stat-card .stat-sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 3rem; }
+    @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } nav { padding: 0 1rem; } }
+  </style>
+</head>
+<body>
+<nav>
+  <a class="brand" href="/">&#9889; P2P XMR</a>
+  <div class="nav-links">
+    <a href="/offers">Browse Offers</a>
+    {% if session.user_id %}
+    <a href="/offers/create">Create Offer</a>
+    <a href="/wallet">Wallet</a>
+    {% endif %}
+  </div>
+  <div class="nav-right">
+    {% if session.user_id %}
+    <a href="/dashboard">{{ session.username }}</a>
+    <a href="/logout" class="btn btn-secondary btn-sm">Logout</a>
+    {% else %}
+    <a href="/login" class="btn btn-secondary btn-sm">Login</a>
+    <a href="/register" class="btn btn-primary btn-sm">Register</a>
+    {% endif %}
+  </div>
+</nav>
+<div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</div>
+<footer>P2P XMR Exchange &mdash; Decentralized &middot; Private &middot; Secure</footer>
+</body>
+</html>

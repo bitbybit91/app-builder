@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Trade #{{ trade.id }}{% endblock %}
+{% block content %}
+<div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+  <h1>Trade #{{ trade.id }}</h1>
+  {% set status_badge = {
+    'open': 'badge-info', 'escrow_funded': 'badge-warning',
+    'fiat_sent': 'badge-warning', 'completed': 'badge-success',
+    'disputed': 'badge-error', 'cancelled': 'badge-muted'
+  } %}
+  <span class="badge {{ status_badge.get(trade.status, 'badge-muted') }}" style="font-size:0.9rem; padding:0.3rem 0.8rem;">
+    {{ trade.status|replace('_', ' ')|title }}
+  </span>
+</div>
+
+<div class="grid-2">
+  <div>
+    <div class="card">
+      <h2>Trade Details</h2>
+      <table>
+        <tr><th>Buyer</th><td>{{ trade.buyer_name }}</td></tr>
+        <tr><th>Seller</th><td>{{ trade.seller_name }}</td></tr>
+        <tr><th>Amount XMR</th><td>{{ "%.6f"|format(trade.amount_xmr) }} XMR</td></tr>
+        <tr><th>Amount Fiat</th><td>{{ "%.2f"|format(trade.amount_fiat) }} {{ trade.fiat_currency }}</td></tr>
+        <tr><th>Payment Method</th><td>{{ trade.payment_method }}</td></tr>
+        {% if trade.escrow_tx_id %}<tr><th>Escrow TX</th><td><code style="font-size:0.8rem;">{{ trade.escrow_tx_id }}</code></td></tr>{% endif %}
+        {% if trade.release_tx_id %}<tr><th>Release TX</th><td><code style="font-size:0.8rem;">{{ trade.release_tx_id }}</code></td></tr>{% endif %}
+        {% if trade.offer_terms %}<tr><th>Terms</th><td>{{ trade.offer_terms }}</td></tr>{% endif %}
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Actions</h2>
+      {% if trade.status == 'open' and user_id == trade.seller_id %}
+      <form method="post" action="/trades/{{ trade.id }}/fund_escrow" style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+        <input type="text" name="escrow_tx_id" placeholder="Escrow TX ID" required style="margin-bottom:0;">
+        <button type="submit" class="btn btn-success">Fund Escrow</button>
+      </form>
+      {% endif %}
+      {% if trade.status == 'escrow_funded' and user_id == trade.buyer_id %}
+      <form method="post" action="/trades/{{ trade.id }}/mark_fiat_sent" style="margin-bottom:1rem;">
+        <button type="submit" class="btn btn-primary">Mark Fiat as Sent</button>
+      </form>
+      {% endif %}
+      {% if trade.status == 'fiat_sent' and user_id == trade.seller_id %}
+      <form method="post" action="/trades/{{ trade.id }}/complete" style="margin-bottom:1rem;">
+        <button type="submit" class="btn btn-success">Release XMR (Complete Trade)</button>
+      </form>
+      {% endif %}
+      {% if trade.status in ('escrow_funded', 'fiat_sent') %}
+      <form method="post" action="/trades/{{ trade.id }}/dispute" style="margin-bottom:1rem;">
+        <button type="submit" class="btn btn-danger">Open Dispute</button>
+      </form>
+      {% endif %}
+      {% if trade.status == 'open' %}
+      <form method="post" action="/trades/{{ trade.id }}/cancel">
+        <button type="submit" class="btn btn-secondary">Cancel Trade</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div>
+    <div class="card" style="height:100%; display:flex; flex-direction:column;">
+      <h2>Chat</h2>
+      <div id="messages" style="flex:1; overflow-y:auto; max-height:400px; margin-bottom:1rem; border:1px solid var(--border); border-radius:6px; padding:1rem;">
+        {% for msg in messages %}
+        <div style="margin-bottom:0.75rem; {{ 'text-align:right;' if msg.sender_id == user_id else '' }}">
+          <div style="display:inline-block; background: {{ 'var(--accent)' if msg.sender_id == user_id else 'var(--border)' }}; color:white; padding:0.5rem 0.75rem; border-radius:12px; max-width:80%; font-size:0.9rem;">
+            {{ msg.message_text }}
+          </div>
+          <div style="font-size:0.75rem; color:var(--muted); margin-top:0.2rem;">{{ msg.sender_name }} &middot; {{ msg.created_at }}</div>
+        </div>
+        {% else %}
+        <p style="color:var(--muted); text-align:center; font-size:0.9rem;">No messages yet.</p>
+        {% endfor %}
+      </div>
+      {% if trade.status not in ('completed', 'cancelled') %}
+      <form method="post" action="/trades/{{ trade.id }}/chat" style="display:flex; gap:0.5rem;">
+        <input type="text" name="message_text" placeholder="Type a message..." required maxlength="2000" style="margin-bottom:0; flex:1;">
+        <button type="submit" class="btn btn-primary">Send</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  var msgs = document.getElementById('messages');
+  if (msgs) msgs.scrollTop = msgs.scrollHeight;
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Wallet{% endblock %}
+{% block content %}
+<h1>Wallet</h1>
+
+<div class="grid-3" style="margin-bottom:1.5rem;">
+  <div class="stat-card">
+    <div class="stat-label">Confirmed Balance</div>
+    <div class="stat-value">{{ "%.6f"|format(balance_confirmed) }} XMR</div>
+    {% if xmr_price %}<div class="stat-sub">&#8776; ${{ "%.2f"|format(balance_confirmed * xmr_price) }} USD</div>{% endif %}
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Pending Balance</div>
+    <div class="stat-value">{{ "%.6f"|format(balance_unconfirmed) }} XMR</div>
+    <div class="stat-sub">Awaiting confirmation</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Deposit Address</div>
+    <div style="font-size:0.75rem; color:var(--muted); word-break:break-all; margin-top:0.5rem;">
+      {{ user.monero_address or 'Not generated yet' }}
+    </div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h2>Deposit XMR</h2>
+    {% if user.monero_address %}
+    <p style="color:var(--muted); font-size:0.9rem; margin-bottom:1rem;">Send XMR to your deposit address:</p>
+    <code style="display:block; word-break:break-all; background:var(--bg); padding:0.75rem; border-radius:6px; font-size:0.8rem; border:1px solid var(--border);">{{ user.monero_address }}</code>
+    {% else %}
+    <form method="post" action="/wallet/deposit">
+      <button type="submit" class="btn btn-primary">Generate Deposit Address</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Withdraw XMR</h2>
+    <form method="post" action="/wallet/withdraw">
+      <div class="form-group">
+        <label>Destination Address</label>
+        <input type="text" name="address" required placeholder="4A... Monero address" style="font-size:0.8rem;">
+      </div>
+      <div class="form-group">
+        <label>Amount (XMR)</label>
+        <input type="number" name="amount" step="0.000001" min="0.000001" max="{{ balance_confirmed }}" required placeholder="0.1">
+      </div>
+      <button type="submit" class="btn btn-danger">Withdraw</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Transaction History</h2>
+  {% if transactions %}
+  <table>
+    <thead><tr><th>Type</th><th>Amount</th><th>Status</th><th>TX Hash</th><th>Date</th></tr></thead>
+    <tbody>
+    {% for tx in transactions %}
+    <tr>
+      <td>{{ tx.tx_type|replace('_', ' ')|title }}</td>
+      <td>{{ "%.6f"|format(tx.amount_xmr) }} XMR</td>
+      <td><span class="badge badge-{{ 'success' if tx.status == 'confirmed' else ('error' if tx.status == 'failed' else 'warning') }}">{{ tx.status }}</span></td>
+      <td><code style="font-size:0.75rem;">{{ tx.tx_hash[:16] ~ '...' if tx.tx_hash and tx.tx_hash|length > 16 else (tx.tx_hash or '&mdash;') }}</code></td>
+      <td style="color:var(--muted); font-size:0.85rem;">{{ tx.created_at }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--muted);">No transactions yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

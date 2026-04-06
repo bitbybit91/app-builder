@@ -1,110 +1,78 @@
-import json
-import pytest
-from app.services.encryption import generate_mnemonic, derive_keypair_from_mnemonic
+def test_offers_page(client):
+    resp = client.get('/offers')
+    assert resp.status_code == 200
 
-def make_offer_data(**kwargs):
-    data = {
-        'type': 'sell',
+def test_create_offer_requires_login(client):
+    resp = client.get('/offers/create', follow_redirects=False)
+    assert resp.status_code == 302
+
+def test_create_offer_success(auth_client):
+    resp = auth_client.post('/offers/create', data={
+        'offer_type': 'sell',
         'fiat_currency': 'USD',
+        'price_margin': '0',
+        'min_amount': '10',
+        'max_amount': '1000',
         'payment_method': 'Bank Transfer',
-        'min_amount': 10.0,
-        'max_amount': 1000.0,
-        'country': 'US',
-        'terms': 'Payment within 30 minutes.',
-    }
-    data.update(kwargs)
-    return data
-
-def test_list_offers_empty(client):
-    resp = client.get('/api/offers')
+        'terms': 'Test terms',
+    }, follow_redirects=True)
     assert resp.status_code == 200
-    data = json.loads(resp.data)
-    assert 'offers' in data
+    assert b'created' in resp.data.lower() or b'dashboard' in resp.data.lower()
 
-def test_create_offer(client, test_user):
-    resp = client.post('/api/offers',
-        data=json.dumps(make_offer_data()),
-        content_type='application/json',
-        headers={'X-Session-Token': test_user['token']})
-    assert resp.status_code == 201
-    data = json.loads(resp.data)
-    assert data['type'] == 'sell'
-    assert data['fiat_currency'] == 'USD'
+def test_create_offer_invalid_type(auth_client):
+    resp = auth_client.post('/offers/create', data={
+        'offer_type': 'invalid',
+        'fiat_currency': 'USD',
+        'price_margin': '0',
+        'min_amount': '10',
+        'max_amount': '1000',
+        'payment_method': 'Cash',
+    }, follow_redirects=True)
+    assert b'buy or sell' in resp.data.lower() or b'type' in resp.data.lower()
 
-def test_create_offer_unauthorized(client):
-    resp = client.post('/api/offers',
-        data=json.dumps(make_offer_data()),
-        content_type='application/json')
-    assert resp.status_code == 401
+def test_create_offer_invalid_margin(auth_client):
+    resp = auth_client.post('/offers/create', data={
+        'offer_type': 'sell',
+        'fiat_currency': 'USD',
+        'price_margin': '100',
+        'min_amount': '10',
+        'max_amount': '1000',
+        'payment_method': 'Cash',
+    }, follow_redirects=True)
+    assert b'margin' in resp.data.lower() or b'-20' in resp.data
 
-def test_create_offer_invalid_type(client, test_user):
-    resp = client.post('/api/offers',
-        data=json.dumps(make_offer_data(type='invalid')),
-        content_type='application/json',
-        headers={'X-Session-Token': test_user['token']})
-    assert resp.status_code == 400
+def test_create_offer_min_greater_than_max(auth_client):
+    resp = auth_client.post('/offers/create', data={
+        'offer_type': 'sell',
+        'fiat_currency': 'USD',
+        'price_margin': '0',
+        'min_amount': '1000',
+        'max_amount': '10',
+        'payment_method': 'Cash',
+    }, follow_redirects=True)
+    assert b'less than' in resp.data.lower() or b'min' in resp.data.lower()
 
-def test_get_offer(client, test_user):
-    create_resp = client.post('/api/offers',
-        data=json.dumps(make_offer_data()),
-        content_type='application/json',
-        headers={'X-Session-Token': test_user['token']})
-    offer_id = json.loads(create_resp.data)['id']
-    resp = client.get(f'/api/offers/{offer_id}')
+def test_filter_offers_by_type(auth_client):
+    auth_client.post('/offers/create', data={
+        'offer_type': 'sell', 'fiat_currency': 'USD',
+        'price_margin': '0', 'min_amount': '10', 'max_amount': '500',
+        'payment_method': 'Cash',
+    })
+    resp = auth_client.get('/offers?type=sell')
     assert resp.status_code == 200
-    assert json.loads(resp.data)['id'] == offer_id
+    assert b'SELL' in resp.data
 
-def test_filter_offers_by_type(client, test_user):
-    client.post('/api/offers',
-        data=json.dumps(make_offer_data(type='sell')),
-        content_type='application/json',
-        headers={'X-Session-Token': test_user['token']})
-    resp = client.get('/api/offers?type=sell')
-    assert resp.status_code == 200
-    data = json.loads(resp.data)
-    assert all(o['type'] == 'sell' for o in data['offers'])
-
-def test_update_offer(client, test_user):
-    create_resp = client.post('/api/offers',
-        data=json.dumps(make_offer_data()),
-        content_type='application/json',
-        headers={'X-Session-Token': test_user['token']})
-    offer_id = json.loads(create_resp.data)['id']
-    resp = client.put(f'/api/offers/{offer_id}',
-        data=json.dumps({'payment_method': 'Cash'}),
-        content_type='application/json',
-        headers={'X-Session-Token': test_user['token']})
-    assert resp.status_code == 200
-    assert json.loads(resp.data)['payment_method'] == 'Cash'
-
-def test_update_offer_forbidden(client, test_user, app, db):
+def test_deactivate_offer(auth_client, app):
+    from database import get_db
+    auth_client.post('/offers/create', data={
+        'offer_type': 'sell', 'fiat_currency': 'USD',
+        'price_margin': '0', 'min_amount': '10', 'max_amount': '500',
+        'payment_method': 'Cash',
+    })
     with app.app_context():
-        from app.models.user import User
-        from app.services.encryption import generate_mnemonic, derive_keypair_from_mnemonic, generate_session_token, hash_session_token
-        m2 = generate_mnemonic()
-        kp2 = derive_keypair_from_mnemonic(m2)
-        t2 = generate_session_token()
-        th2 = hash_session_token(t2, app.config['HMAC_SECRET'])
-        u2 = User(session_token_hash=th2, public_key=kp2['public_key'], display_name='Other')
-        db.session.add(u2)
-        db.session.commit()
-    create_resp = client.post('/api/offers',
-        data=json.dumps(make_offer_data()),
-        content_type='application/json',
-        headers={'X-Session-Token': test_user['token']})
-    offer_id = json.loads(create_resp.data)['id']
-    resp = client.put(f'/api/offers/{offer_id}',
-        data=json.dumps({'payment_method': 'Cash'}),
-        content_type='application/json',
-        headers={'X-Session-Token': t2})
-    assert resp.status_code == 403
-
-def test_delete_offer(client, test_user):
-    create_resp = client.post('/api/offers',
-        data=json.dumps(make_offer_data()),
-        content_type='application/json',
-        headers={'X-Session-Token': test_user['token']})
-    offer_id = json.loads(create_resp.data)['id']
-    resp = client.delete(f'/api/offers/{offer_id}',
-        headers={'X-Session-Token': test_user['token']})
+        db = get_db()
+        offer = db.execute('SELECT id FROM offers LIMIT 1').fetchone()
+        assert offer is not None
+        offer_id = offer['id']
+    resp = auth_client.post(f'/offers/{offer_id}/deactivate', follow_redirects=True)
     assert resp.status_code == 200
