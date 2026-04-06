@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<div class="grid-3" style="margin-bottom:1.5rem;">
+  <div class="stat-card">
+    <div class="stat-label">Confirmed Balance</div>
+    <div class="stat-value">{{ "%.6f"|format(balance_confirmed) }} XMR</div>
+    {% if xmr_prices.usd %}<div class="stat-sub">&#8776; ${{ "%.2f"|format(usd_value) }} USD</div>{% endif %}
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Pending Balance</div>
+    <div class="stat-value">{{ "%.6f"|format(balance_unconfirmed) }} XMR</div>
+    <div class="stat-sub">Awaiting confirmation</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">XMR Price</div>
+    <div class="stat-value">${{ "%.2f"|format(xmr_prices.usd or 0) }}</div>
+    <div class="stat-sub">EUR: {{ "%.2f"|format(xmr_prices.eur or 0) }}</div>
+  </div>
+</div>
+
+<div style="display:flex; gap:1rem; margin-bottom:1.5rem;">
+  <a href="/offers/create" class="btn btn-primary">+ Create Offer</a>
+  <a href="/wallet" class="btn btn-secondary">Wallet</a>
+  <a href="/offers" class="btn btn-secondary">Browse Offers</a>
+</div>
+
+<div class="card">
+  <h2>Your Active Offers</h2>
+  {% if active_offers %}
+  <table>
+    <thead><tr><th>Type</th><th>Currency</th><th>Payment</th><th>Range</th><th>Margin</th><th></th></tr></thead>
+    <tbody>
+    {% for offer in active_offers %}
+    <tr>
+      <td><span class="badge badge-{{ 'success' if offer.offer_type == 'sell' else 'info' }}">{{ offer.offer_type|upper }}</span></td>
+      <td>{{ offer.fiat_currency }}</td>
+      <td>{{ offer.payment_method }}</td>
+      <td>{{ offer.min_amount }} &ndash; {{ offer.max_amount }}</td>
+      <td>{{ "%+.1f"|format(offer.price_margin) }}%</td>
+      <td>
+        <form method="post" action="/offers/{{ offer.id }}/deactivate" style="display:inline;">
+          <button type="submit" class="btn btn-danger btn-sm">Deactivate</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--muted);">No active offers. <a href="/offers/create">Create one</a>.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Open Trades</h2>
+  {% if open_trades %}
+  <table>
+    <thead><tr><th>ID</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for trade in open_trades %}
+    <tr>
+      <td>#{{ trade.id }}</td>
+      <td>{{ trade.buyer_name }}</td>
+      <td>{{ trade.seller_name }}</td>
+      <td>{{ "%.4f"|format(trade.amount_xmr) }} XMR / {{ "%.2f"|format(trade.amount_fiat) }} {{ trade.fiat_currency }}</td>
+      <td><span class="badge badge-warning">{{ trade.status }}</span></td>
+      <td><a href="/trades/{{ trade.id }}" class="btn btn-secondary btn-sm">View</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--muted);">No open trades.</p>
+  {% endif %}
+</div>
+{% endblock %}
