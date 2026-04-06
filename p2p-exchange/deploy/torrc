@@ -1,0 +1,9 @@
+# Tor Hidden Service Configuration for P2P XMR Exchange
+# Place this in /etc/tor/torrc (or append to existing)
+
+# Hidden service directory
+HiddenServiceDir /var/lib/tor/p2p-exchange/
+# Map port 80 on the .onion to localhost:8000 (Gunicorn)
+HiddenServicePort 80 127.0.0.1:8000
+# Optional: Version 3 onion (default in modern Tor)
+HiddenServiceVersion 3
