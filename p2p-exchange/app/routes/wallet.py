@@ -19,8 +19,9 @@ def get_balance():
         xmr = get_xmr_client()
         balance = xmr.get_balance()
         return jsonify(balance)
-    except MoneroRPCError as e:
-        return jsonify({'error': f'XMR RPC error: {str(e)}', 'balance': 0, 'unlocked_balance': 0}), 503
+    except MoneroRPCError:
+        current_app.logger.warning('XMR RPC error in get_balance', exc_info=True)
+        return jsonify({'error': 'XMR RPC unavailable', 'balance': 0, 'unlocked_balance': 0}), 503
 
 @wallet_bp.route('/deposit', methods=['POST'])
 def get_deposit_address():
@@ -31,8 +32,9 @@ def get_deposit_address():
         xmr = get_xmr_client()
         result = xmr.create_subaddress(label=f'user_{user.id}_deposit')
         return jsonify({'address': result['address'], 'address_index': result['address_index']})
-    except MoneroRPCError as e:
-        return jsonify({'error': f'XMR RPC error: {str(e)}'}), 503
+    except MoneroRPCError:
+        current_app.logger.warning('XMR RPC error in get_deposit_address', exc_info=True)
+        return jsonify({'error': 'XMR RPC unavailable'}), 503
 
 @wallet_bp.route('/withdraw', methods=['POST'])
 def withdraw():
@@ -49,8 +51,9 @@ def withdraw():
         amount_atomic = int(float(amount_xmr) * 1e12)
         result = xmr.transfer([{'amount': amount_atomic, 'address': address}])
         return jsonify({'success': True, 'txid': result['tx_hash'], 'fee': result['fee']})
-    except MoneroRPCError as e:
-        return jsonify({'error': f'XMR RPC error: {str(e)}'}), 503
+    except MoneroRPCError:
+        current_app.logger.warning('XMR RPC error in withdraw', exc_info=True)
+        return jsonify({'error': 'XMR RPC unavailable'}), 503
 
 @wallet_bp.route('/transactions', methods=['GET'])
 def get_transactions():
@@ -61,8 +64,9 @@ def get_transactions():
         xmr = get_xmr_client()
         transfers = xmr.get_transfers()
         return jsonify({'transactions': transfers})
-    except MoneroRPCError as e:
-        return jsonify({'error': f'XMR RPC error: {str(e)}', 'transactions': {}}), 503
+    except MoneroRPCError:
+        current_app.logger.warning('XMR RPC error in get_transactions', exc_info=True)
+        return jsonify({'error': 'XMR RPC unavailable', 'transactions': {}}), 503
 
 @wallet_bp.route('/status', methods=['GET'])
 def network_status():
@@ -70,5 +74,7 @@ def network_status():
         xmr = get_xmr_client()
         height = xmr.get_block_count()
         return jsonify({'status': 'connected', 'height': height})
-    except MoneroRPCError as e:
-        return jsonify({'status': 'disconnected', 'error': str(e)}), 503
+    except MoneroRPCError:
+        current_app.logger.warning('XMR RPC error in network_status', exc_info=True)
+        return jsonify({'status': 'disconnected', 'error': 'XMR RPC unavailable'}), 503
+
