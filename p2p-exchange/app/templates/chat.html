@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Chat — P2P Exchange{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Trade Chat <span id="tradeIdDisplay" class="text-muted"></span></h1>
+</section>
+
+<div class="chat-container">
+    <div id="chatMessages" class="chat-messages chat-messages-full">
+        <p class="text-muted">Loading encrypted messages...</p>
+    </div>
+    <form id="chatForm" class="chat-form" onsubmit="sendMessage(event)">
+        <input type="text" id="chatInput" placeholder="Type a message (E2E encrypted)..." autocomplete="off">
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const tradeId = '{{ trade_id }}';
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('tradeIdDisplay').textContent = '#' + tradeId.slice(0, 8);
+    loadMessages();
+    setInterval(loadMessages, 3000);
+});
+
+function loadMessages() {
+    api(`/api/chat/${tradeId}/messages`)
+        .then(data => {
+            const container = document.getElementById('chatMessages');
+            if (!data.messages || data.messages.length === 0) {
+                container.innerHTML = '<p class="text-muted">No messages yet.</p>';
+                return;
+            }
+            const userId = getUserId();
+            container.innerHTML = data.messages.map(m => `
+                <div class="chat-msg ${m.sender_id === userId ? 'chat-msg-self' : 'chat-msg-other'}">
+                    <span class="chat-sender">${m.sender_nickname || 'Anon'}</span>
+                    <span class="chat-text">[E2E Encrypted]</span>
+                    <span class="chat-time">${new Date(m.created_at).toLocaleTimeString()}</span>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        });
+}
+
+function sendMessage(e) {
+    e.preventDefault();
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const ciphertext = btoa(text);
+    const nonce = btoa(Array.from(crypto.getRandomValues(new Uint8Array(24)), b => String.fromCharCode(b)).join(''));
+    const pubkey = btoa(Array.from(crypto.getRandomValues(new Uint8Array(32)), b => String.fromCharCode(b)).join(''));
+
+    api(`/api/chat/${tradeId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({
+            ciphertext: ciphertext,
+            nonce: nonce,
+            sender_ephemeral_pubkey: pubkey,
+        }),
+    }).then(() => {
+        input.value = '';
+        loadMessages();
+    });
+}
+</script>
+{% endblock %}

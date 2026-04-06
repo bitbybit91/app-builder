@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}P2P Exchange{% endblock %}</title>
+    <!-- No external CDN calls — Tor-friendly -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="nav-brand">⚡ P2P Exchange</a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">☰</button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="/offers">Offers</a></li>
+                <li><a href="/offers/create">Create Offer</a></li>
+                <li><a href="/wallet">Wallet</a></li>
+                <li><a href="/about">About</a></li>
+                <li id="navUser" class="nav-user" style="display:none;">
+                    <span id="navNickname" class="badge"></span>
+                </li>
+                <li id="navLogin" class="nav-login">
+                    <button class="btn btn-sm" onclick="createSession()">Start Trading</button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>P2P Exchange — No KYC. Non-custodial. Private by design.</p>
+            <p class="footer-links">
+                <a href="/about">About</a> ·
+                <a href="https://www.getmonero.org" target="_blank" rel="noopener">Monero</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

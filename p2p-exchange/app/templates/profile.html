@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ nickname }} — P2P Exchange{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Trader Profile</h1>
+</section>
+
+<div id="profileData" class="profile-card">
+    <p class="loading">Loading profile...</p>
+</div>
+
+<h2>Active Offers</h2>
+<div id="profileOffers" class="offers-list">
+    <p class="loading">Loading offers...</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const nickname = '{{ nickname }}';
+
+document.addEventListener('DOMContentLoaded', function() {
+    // In a full implementation, we'd have a /api/users/<nickname> endpoint
+    // For now, show a placeholder
+    document.getElementById('profileData').innerHTML = `
+        <div class="profile-header">
+            <h2>${nickname}</h2>
+            <p class="text-muted">Trader profile</p>
+        </div>
+        <div class="info-grid">
+            <div class="info-row"><span>Nickname</span><strong>${nickname}</strong></div>
+            <div class="info-row"><span>Trust Level</span><span class="badge">New</span></div>
+            <div class="info-row"><span>Trades</span><strong>0</strong></div>
+            <div class="info-row"><span>Success Rate</span><strong>—</strong></div>
+        </div>
+    `;
+    document.getElementById('profileOffers').innerHTML = '<p class="text-muted">No active offers.</p>';
+});
+</script>
+{% endblock %}

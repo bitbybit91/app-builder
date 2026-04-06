@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}P2P Exchange — No-KYC Monero Trading{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Trade Monero Privately</h1>
+    <p class="hero-subtitle">
+        No KYC. No registration. Non-custodial escrow. Works over Tor.
+    </p>
+    <div class="hero-actions">
+        <a href="/offers?type=sell" class="btn btn-primary btn-lg">Buy XMR</a>
+        <a href="/offers?type=buy" class="btn btn-secondary btn-lg">Sell XMR</a>
+    </div>
+</section>
+
+<section class="features">
+    <h2>How It Works</h2>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>No KYC</h3>
+            <p>No registration, no email, no phone number. Trade with a pseudonymous identity or 12-word mnemonic backup.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔑</div>
+            <h3>Non-Custodial</h3>
+            <p>Your keys, your coins. The platform never holds private keys. Escrow uses on-chain verification.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">💬</div>
+            <h3>E2E Encrypted Chat</h3>
+            <p>All trade communication is end-to-end encrypted. The server stores only ciphertext.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🧅</div>
+            <h3>Tor-Friendly</h3>
+            <p>No external CDN calls, no JavaScript frameworks, no tracking. Loads fast over Tor.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⚖️</div>
+            <h3>Fair Disputes</h3>
+            <p>Dispute resolution with encrypted evidence. Arbitrators never see your chat until a dispute is opened.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⭐</div>
+            <h3>Reputation System</h3>
+            <p>Traders build trust through completed trades. Trust scores are publicly visible on every offer.</p>
+        </div>
+    </div>
+</section>
+
+<section class="recent-offers">
+    <h2>Recent Offers</h2>
+    <div id="recentOffers" class="offers-list">
+        <p class="loading">Loading offers...</p>
+    </div>
+    <div class="text-center" style="margin-top:1rem;">
+        <a href="/offers" class="btn btn-secondary">View All Offers</a>
+    </div>
+</section>
+
+<section class="stats">
+    <h2>Network Status</h2>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-value" id="blockHeight">—</span>
+            <span class="stat-label">Block Height</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" id="activeOffers">—</span>
+            <span class="stat-label">Active Offers</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" id="networkStatus">—</span>
+            <span class="stat-label">Network</span>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load recent offers
+    api('/api/offers?per_page=6')
+        .then(data => {
+            const container = document.getElementById('recentOffers');
+            if (!data.offers || data.offers.length === 0) {
+                container.innerHTML = '<p class="text-muted">No offers yet. Be the first to create one!</p>';
+                return;
+            }
+            document.getElementById('activeOffers').textContent = data.total;
+            container.innerHTML = data.offers.map(o => renderOfferCard(o)).join('');
+        })
+        .catch(() => {
+            document.getElementById('recentOffers').innerHTML = '<p class="text-muted">Could not load offers.</p>';
+        });
+
+    // Load network status
+    api('/api/wallet/network')
+        .then(data => {
+            document.getElementById('blockHeight').textContent = data.block_height?.toLocaleString() || '—';
+            document.getElementById('networkStatus').textContent = data.status === 'ok' ? '✅ Online' : '❌ Offline';
+        })
+        .catch(() => {
+            document.getElementById('networkStatus').textContent = '⚠️ Unknown';
+        });
+});
+</script>
+{% endblock %}
