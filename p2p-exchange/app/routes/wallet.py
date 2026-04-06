@@ -117,7 +117,7 @@ def withdraw():
         return jsonify({'error': 'Wallet service unavailable'}), 503
     except Exception as exc:
         logger.error('Withdrawal error: %s', exc)
-        return jsonify({'error': str(exc)}), 500
+        return jsonify({'error': 'Withdrawal failed'}), 500
 
 
 @wallet_bp.route('/transactions', methods=['GET'])

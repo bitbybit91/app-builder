@@ -145,9 +145,7 @@ def recover_from_mnemonic():
     try:
         keypair = mnemonic_to_keypair(mnemonic)
     except ValueError as exc:
-        return jsonify({'error': str(exc)}), 400
-
-    # Find user by public key
+        return jsonify({'error': 'Invalid mnemonic phrase'}), 400
     user = User.query.filter_by(public_key=keypair['public_key']).first()
     if not user:
         return jsonify({'error': 'Identity not found. Create a new session first.'}), 404
@@ -194,10 +192,8 @@ def bind_mnemonic():
 
     try:
         keypair = mnemonic_to_keypair(mnemonic)
-    except ValueError as exc:
-        return jsonify({'error': str(exc)}), 400
-
-    # Check if public key is already bound
+    except ValueError:
+        return jsonify({'error': 'Invalid mnemonic phrase'}), 400
     existing = User.query.filter_by(public_key=keypair['public_key']).first()
     if existing and existing.id != user.id:
         return jsonify({'error': 'This mnemonic is already bound to another identity'}), 409

@@ -105,8 +105,8 @@ def send_message(trade_id):
     # Validate message structure (NOT decrypt — server can't)
     try:
         validate_message_structure(ciphertext, nonce, sender_pubkey)
-    except ValueError as exc:
-        return jsonify({'error': str(exc)}), 400
+    except ValueError:
+        return jsonify({'error': 'Invalid encrypted message structure'}), 400
 
     # Size limit: 64KB per message
     if len(ciphertext) > 65536:

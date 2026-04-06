@@ -272,7 +272,7 @@ def mark_fiat_received(trade_id):
         return jsonify({'trade': trade.to_dict(), 'release': result}), 200
     except Exception as exc:
         logger.error('Escrow release failed: %s', exc)
-        return jsonify({'trade': trade.to_dict(), 'error': str(exc)}), 500
+        return jsonify({'trade': trade.to_dict(), 'error': 'Escrow release failed'}), 500
 
 
 @trades_bp.route('/<trade_id>/cancel', methods=['POST'])
@@ -329,5 +329,5 @@ def open_dispute(trade_id):
         escrow_svc = _get_escrow_service()
         escrow_svc.open_dispute(trade, user.id, reason)
         return jsonify({'trade': trade.to_dict()}), 200
-    except ValueError as exc:
-        return jsonify({'error': str(exc)}), 400
+    except ValueError:
+        return jsonify({'error': 'Cannot open dispute on this trade'}), 400
