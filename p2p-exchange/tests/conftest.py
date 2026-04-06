@@ -6,11 +6,11 @@ import pytest
 from app import create_app, db as _db
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def app():
-    """Create Flask application for testing."""
-    app = create_app('testing')
-    yield app
+    """Create Flask application for testing — fresh per test."""
+    _app = create_app('testing')
+    yield _app
 
 
 @pytest.fixture(scope='function')
@@ -19,7 +19,7 @@ def db(app):
     with app.app_context():
         _db.create_all()
         yield _db
-        _db.session.rollback()
+        _db.session.remove()
         _db.drop_all()
 
 
@@ -34,7 +34,9 @@ def client(app, db):
 @pytest.fixture
 def session_token(client):
     """Create a session and return the token."""
-    response = client.post('/api/auth/session', json={'nickname': 'testuser'})
+    import uuid
+    nickname = f'testuser-{uuid.uuid4().hex[:8]}'
+    response = client.post('/api/auth/session', json={'nickname': nickname})
     data = response.get_json()
     return data['session_token']
 
@@ -48,7 +50,9 @@ def auth_headers(session_token):
 @pytest.fixture
 def second_session(client):
     """Create a second session for two-party trades."""
-    response = client.post('/api/auth/session', json={'nickname': 'testuser2'})
+    import uuid
+    nickname = f'testuser2-{uuid.uuid4().hex[:8]}'
+    response = client.post('/api/auth/session', json={'nickname': nickname})
     data = response.get_json()
     return {
         'token': data['session_token'],

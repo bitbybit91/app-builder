@@ -71,7 +71,12 @@ class TestUserModel:
         assert user.trust_level == 'Good'
 
     def test_to_dict(self):
-        user = User(nickname='testdict', trade_count=5, successful_trades=4, trust_score=70)
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc)
+        user = User(
+            nickname='testdict', trade_count=5, successful_trades=4,
+            trust_score=70, created_at=now, last_seen_at=now,
+        )
         d = user.to_dict()
         assert d['nickname'] == 'testdict'
         assert d['trade_count'] == 5
