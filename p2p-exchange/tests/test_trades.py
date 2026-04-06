@@ -27,7 +27,8 @@ def test_initiate_trade(app, second_user_client):
     offer_id = offer['id']
 
     # Seed the coingecko cache so trade initiation can compute amount_xmr
-    import coingecko, time
+    import coingecko
+    import time
     coingecko._cache['xmr_usd'] = (150.0, time.time())
 
     resp = second_user_client.post('/trades/initiate', data={
@@ -64,7 +65,8 @@ def test_cancel_trade(app):
     offer_id = offer['id']
 
     # Seed the coingecko cache so trade initiation can compute amount_xmr
-    import coingecko, time
+    import coingecko
+    import time
     coingecko._cache['xmr_usd'] = (150.0, time.time())
 
     buyer.post('/trades/initiate', data={'offer_id': str(offer_id), 'amount_fiat': '50'})

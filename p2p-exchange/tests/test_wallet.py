@@ -1,4 +1,4 @@
-_VALID_XMR_ADDR = '44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A'
+VALID_XMR_ADDR = '44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A'
 
 
 def test_wallet_requires_login(client):
@@ -9,11 +9,11 @@ def test_wallet_requires_login(client):
 def test_wallet_page(auth_client):
     resp = auth_client.get('/wallet')
     assert resp.status_code == 200
-    assert b'Wallet' in resp.data or b'wallet' in resp.data.lower()
+    assert b'wallet' in resp.data.lower()
 
 def test_wallet_withdraw_no_balance(auth_client):
     resp = auth_client.post('/wallet/withdraw', data={
-        'address': _VALID_XMR_ADDR,
+        'address': VALID_XMR_ADDR,
         'amount': '1.0',
     }, follow_redirects=True)
     assert resp.status_code == 200
@@ -21,7 +21,7 @@ def test_wallet_withdraw_no_balance(auth_client):
 
 def test_wallet_withdraw_invalid_amount(auth_client):
     resp = auth_client.post('/wallet/withdraw', data={
-        'address': _VALID_XMR_ADDR,
+        'address': VALID_XMR_ADDR,
         'amount': 'notanumber',
     }, follow_redirects=True)
     assert resp.status_code == 200
