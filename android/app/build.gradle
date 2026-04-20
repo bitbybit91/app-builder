@@ -89,4 +89,18 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.multidex:multidex:2.0.1'
+
+    // Firebase is only included for the production flavor.
+    // The fdroid flavor intentionally excludes all proprietary Google/Firebase
+    // libraries to satisfy F-Droid's Free/Open Source requirement.
+    productionImplementation platform('com.google.firebase:firebase-bom:32.7.0')
+    productionImplementation 'com.google.firebase:firebase-messaging'
+    productionImplementation 'com.google.firebase:firebase-analytics'
+}
+
+// Apply the google-services plugin only when google-services.json is present.
+// Production builds supply this file; fdroid builds intentionally omit it so
+// that no proprietary Firebase configuration is required.
+if (file("google-services.json").exists()) {
+    apply plugin: 'com.google.gms.google-services'
 }

@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../network/api_client.dart';
 import '../network/auth_interceptor.dart';
+import '../notifications/notification_service.dart';
 import '../storage/secure_storage_service.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -39,7 +40,14 @@ import '../../features/profile/presentation/bloc/profile_bloc.dart';
 
 final getIt = GetIt.instance;
 
-Future<void> configureDependencies() async {
+Future<void> configureDependencies({
+  required NotificationService notificationService,
+}) async {
+  // Notifications – initialise the flavor-specific back-end and register it
+  // so the rest of the app can depend on the abstract NotificationService.
+  await notificationService.initialize();
+  getIt.registerLazySingleton<NotificationService>(() => notificationService);
+
   // Core
   getIt.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),
