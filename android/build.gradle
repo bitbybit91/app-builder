@@ -7,6 +7,9 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // google-services classpath is always present so that the plugin can be
+        // applied selectively per flavor in android/app/build.gradle.
+        // The plugin itself is only applied for the production flavor (see below).
         classpath 'com.google.gms:google-services:4.4.0'
     }
 }

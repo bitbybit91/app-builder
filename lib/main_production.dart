@@ -1,13 +1,17 @@
-// Entry point for the **fdroid** flavor.
+// Entry point for the **production** flavor.
 //
 // Build command:
-//   flutter build apk --flavor fdroid --release
+//   flutter build apk --flavor production --release -t lib/main_production.dart
 //
-// This entry point uses StubNotificationService so that no proprietary
-// Firebase / Google libraries are compiled into the fdroid APK, satisfying
-// F-Droid's Free/Open Source requirement.
+// Before building, ensure firebase_core and firebase_messaging are added to
+// pubspec.yaml and that android/app/google-services.json is present:
 //
-// For the production flavor see lib/main_production.dart.
+//   flutter pub add firebase_core firebase_messaging
+//
+// This entry point imports FirebaseNotificationService.  Because it is only
+// referenced from this file (and never from lib/main.dart), the Dart compiler
+// excludes it – along with any firebase_* imports – when the fdroid entry
+// point is used.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +19,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'app/app.dart';
 import 'core/di/injection.dart';
-import 'core/notifications/stub_notification_service.dart';
+import 'core/notifications/firebase_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,10 +29,8 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Use the no-op stub: fdroid builds must not include proprietary Firebase
-  // libraries.
   await configureDependencies(
-    notificationService: StubNotificationService(),
+    notificationService: FirebaseNotificationService(),
   );
 
   Bloc.observer = AppBlocObserver();

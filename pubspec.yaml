@@ -33,8 +33,6 @@ dependencies:
   share_plus: ^7.2.1
   connectivity_plus: ^5.0.2
   local_auth: ^2.1.7
-  firebase_core: ^2.24.2
-  firebase_messaging: ^14.7.9
   pointycastle: ^3.7.4
   bip39: ^1.0.6
   encrypt: ^5.0.3
