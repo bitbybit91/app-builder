@@ -1,33 +1,46 @@
-name: Build & attach APK to GitHub Release
+name: Auto Build & Release APK
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - copilot/remove-firebase-dependencies-fdroid
 
 permissions:
   contents: write
 
 jobs:
-  build-release-apk:
+  build-and-release:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Get dependencies
+        run: flutter pub get
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease
+        run: flutter build apk --release
 
-      - name: Upload APK(s) to GitHub Release
+      - name: Generate version tag
+        id: version
+        run: echo "tag=v$(date +'%Y.%m.%d')-${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Create Release with APK
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            **/build/outputs/apk/release/*.apk
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "Release ${{ steps.version.outputs.tag }}"
+          body: "Automated release from commit ${{ github.sha }}"
+          files: build/app/outputs/flutter-apk/app-release.apk
