@@ -1,0 +1,33 @@
+name: Build & attach APK to GitHub Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-release-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+
+      - name: Upload APK(s) to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            **/build/outputs/apk/release/*.apk
