@@ -33,7 +33,8 @@ class RetryInterceptor extends Interceptor {
     }
 
     final nextCount = retryCount + 1;
-    final backoff = Duration(seconds: 1 << (nextCount - 1)); // 1s, 2s, 4s
+    // Exponential backoff: retry 1 → 1s, retry 2 → 2s, retry 3 → 4s.
+    final backoff = Duration(seconds: 1 << (nextCount - 1));
 
     AppLogger.w(
       _tag,

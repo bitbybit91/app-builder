@@ -46,9 +46,9 @@ class KeyDerivationService {
   /// Returns `true` when [pin] matches [storedHash] (produced by [hashPin]).
   ///
   /// [storedHash] must follow the `<salt>:<base64Key>` format written by
-  /// [hashPin]. The [salt] parameter is ignored when [storedHash] already
-  /// contains an embedded salt; pass it only for legacy compatibility.
-  bool verifyPin(String pin, String storedHash, String salt) {
+  /// [hashPin]. When [storedHash] contains an embedded salt that format takes
+  /// precedence; [salt] is only used for legacy hashes that lack the prefix.
+  bool verifyPin(String pin, String storedHash, [String? salt]) {
     final String effectiveSalt;
     final String expectedEncoded;
 
@@ -57,7 +57,9 @@ class KeyDerivationService {
       effectiveSalt = parts[0];
       expectedEncoded = parts[1];
     } else {
-      effectiveSalt = salt;
+      // Legacy hash without embedded salt — caller must supply it.
+      assert(salt != null, 'salt must be provided for legacy (no-prefix) hashes');
+      effectiveSalt = salt ?? '';
       expectedEncoded = storedHash;
     }
 
