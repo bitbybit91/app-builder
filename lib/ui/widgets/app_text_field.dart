@@ -48,7 +48,7 @@ class _AppTextFieldState extends State<AppTextField> {
     final isPassword = widget.obscureText;
 
     Widget? effectiveSuffixIcon = widget.suffixIcon;
-    if (isPassword) {
+    if (isPassword && widget.suffixIcon == null) {
       effectiveSuffixIcon = IconButton(
         icon: Icon(_obscured ? Icons.visibility_off_outlined : Icons.visibility_outlined),
         onPressed: () => setState(() => _obscured = !_obscured),
