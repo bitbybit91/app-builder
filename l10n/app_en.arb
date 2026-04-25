@@ -1,0 +1,35 @@
+{
+  "@@locale": "en",
+  "appTitle": "CapitalMonero",
+  "@appTitle": {
+    "description": "The name of the application"
+  },
+  "tagline": "P2P Monero & Bitcoin Trading",
+  "@tagline": {
+    "description": "Application tagline shown on the splash screen"
+  },
+  "errorGeneric": "Something went wrong. Please try again.",
+  "@errorGeneric": {
+    "description": "Generic error message"
+  },
+  "errorNetwork": "Network error. Check your connection and retry.",
+  "@errorNetwork": {
+    "description": "Network error message"
+  },
+  "labelLoading": "Loading…",
+  "@labelLoading": {
+    "description": "Loading indicator label"
+  },
+  "buttonRetry": "Retry",
+  "@buttonRetry": {
+    "description": "Label for retry buttons"
+  },
+  "buttonCancel": "Cancel",
+  "@buttonCancel": {
+    "description": "Label for cancel buttons"
+  },
+  "buttonConfirm": "Confirm",
+  "@buttonConfirm": {
+    "description": "Label for confirmation buttons"
+  }
+}
