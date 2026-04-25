@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Customize this file to match your native app's branding. -->
+<!-- Supported parent themes: Theme.Black.NoTitleBar,
+                              Theme.Black.NoTitleBar.Fullscreen,
+                              Theme.Light.NoTitleBar,
+                              Theme.Light.NoTitleBar.Fullscreen,
+                              Theme.Holo.NoActionBar,
+                              Theme.Holo.Light.NoActionBar,
+                              Theme.AppCompat.NoActionBar,
+                              Theme.AppCompat.Light.NoActionBar -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@android:color/white" />
+</layer-list>
