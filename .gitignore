@@ -1,0 +1,60 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+.pub-cache/
+.pub/
+
+# Generated files — can be re-generated with `dart run build_runner build`
+*.g.dart
+*.freezed.dart
+
+# Dart package lock — intentionally excluded so CI always resolves latest compatible versions
+# Uncomment the line below if you want reproducible installs:
+# pubspec.lock
+
+# Android
+*.iml
+.gradle/
+android/local.properties
+android/.gradletestkit/
+android/app/google-services.json
+key.properties
+*.jks
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/app.flx
+ios/Flutter/app.zip
+ios/Flutter/flutter_assets/
+ios/ServiceDefinitions.json
+ios/Runner/GeneratedPluginRegistrant.*
+GoogleService-Info.plist
+
+# Firebase
+google-services.json
+
+# Secrets / environment
+.env
+*.env
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# IDEs
+.idea/
+*.iml
+.vscode/settings.json
+
+# OS files
+.DS_Store
+Thumbs.db
