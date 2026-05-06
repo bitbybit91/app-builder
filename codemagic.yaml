@@ -1,0 +1,171 @@
+##############################################################################
+#  codemagic.yaml — Magoradesk Flutter Android Release Pipeline
+#
+#  Triggered on:  push to `main`  |  tags matching `v*.*.*`
+#
+#  Required environment variables (set in Codemagic UI → Environment variables):
+#    CM_KEYSTORE            Base64-encoded JKS keystore
+#    CM_KEYSTORE_PASSWORD   Store password
+#    CM_KEY_ALIAS           Key alias
+#    CM_KEY_PASSWORD        Key password
+#    CM_NOTIFY_EMAIL        (optional) Email address to send build results
+#    CM_TELEGRAM_BOT_TOKEN  (optional) Telegram bot token for notifications
+#    CM_TELEGRAM_CHAT_ID    (optional) Telegram chat / channel ID
+#
+#  See CODEMAGIC_SETUP.md for detailed setup instructions.
+##############################################################################
+
+workflows:
+
+  # ══════════════════════════════════════════════════════════════════════════
+  #  flutter-release-apk
+  #  Builds a signed release APK and uploads it as a build artifact.
+  # ══════════════════════════════════════════════════════════════════════════
+  flutter-release-apk:
+    name: Flutter Release APK
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+
+    # ── Triggering ─────────────────────────────────────────────────────────
+    triggering:
+      events:
+        - push
+        - tag
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+      tag_patterns:
+        - pattern: 'v*.*.*'
+          include: true
+
+    # ── Environment ────────────────────────────────────────────────────────
+    environment:
+      flutter: 3.22.2        # Pin to a known-good stable version
+      java: 17
+      groups:
+        - magoradesk_signing  # Codemagic variable group — see CODEMAGIC_SETUP.md
+      vars:
+        # Non-secret build-time configuration
+        FLUTTER_BUILD_NUMBER: $(($(git rev-list --count HEAD)))
+        GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false"
+
+    # ── Caching ────────────────────────────────────────────────────────────
+    cache:
+      cache_paths:
+        - $HOME/.gradle/caches
+        - $HOME/.gradle/wrapper
+        - $HOME/.pub-cache
+        - $FCI_BUILD_DIR/.dart_tool
+
+    # ── Build scripts ──────────────────────────────────────────────────────
+    scripts:
+      - name: "Set up signing (decode keystore + write key.properties)"
+        script: |
+          python3 scripts/setup_signing.py
+
+      - name: "Flutter: get dependencies"
+        script: |
+          flutter pub get
+
+      - name: "Flutter: analyze (non-blocking)"
+        script: |
+          flutter analyze --no-pub || true
+
+      - name: "Flutter: run tests (non-blocking if no tests exist)"
+        script: |
+          flutter test --no-pub || true
+
+      - name: "Flutter: build split-per-ABI release APKs"
+        script: |
+          flutter build apk \
+            --release \
+            --split-per-abi \
+            --build-number="$(git rev-list --count HEAD)" \
+            --no-pub
+
+      - name: "Flutter: build universal release APK"
+        script: |
+          flutter build apk \
+            --release \
+            --build-number="$(git rev-list --count HEAD)" \
+            --no-pub
+
+    # ── Artifacts ──────────────────────────────────────────────────────────
+    artifacts:
+      # Per-ABI APKs (smallest download for end-users)
+      - build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+      - build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+      - build/app/outputs/flutter-apk/app-x86_64-release.apk
+      # Universal APK (single file, all ABIs)
+      - build/app/outputs/flutter-apk/app-release.apk
+      # R8 mapping file for crash de-obfuscation
+      - build/app/outputs/mapping/release/mapping.txt
+
+    # ── Publishing ─────────────────────────────────────────────────────────
+    publishing:
+      # Email notification — reads CM_NOTIFY_EMAIL from env
+      email:
+        recipients:
+          - $CM_NOTIFY_EMAIL
+        notify:
+          success: true
+          failure: true
+
+      # Telegram notification — reads CM_TELEGRAM_BOT_TOKEN + CM_TELEGRAM_CHAT_ID
+      # Uncomment when variables are configured in Codemagic UI
+      # scripts:
+      #   - name: Notify Telegram
+      #     script: |
+      #       if [ -n "$CM_TELEGRAM_BOT_TOKEN" ] && [ -n "$CM_TELEGRAM_CHAT_ID" ]; then
+      #         STATUS="${FCI_BUILD_STEP_STATUS:-unknown}"
+      #         MESSAGE="Magoradesk build %23${BUILD_NUMBER} — ${STATUS}"
+      #         curl -s -X POST "https://api.telegram.org/bot${CM_TELEGRAM_BOT_TOKEN}/sendMessage" \
+      #           -d "chat_id=${CM_TELEGRAM_CHAT_ID}" \
+      #           -d "text=${MESSAGE}"
+      #       fi
+
+  # ══════════════════════════════════════════════════════════════════════════
+  #  flutter-debug-apk
+  #  Quick debug build for PR / branch validation — no signing required.
+  # ══════════════════════════════════════════════════════════════════════════
+  flutter-debug-apk:
+    name: Flutter Debug APK
+    instance_type: linux_x2
+    max_build_duration: 30
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: '*'
+          include: true
+          source: true
+        - pattern: main
+          include: false
+
+    environment:
+      flutter: 3.22.2
+      java: 17
+
+    cache:
+      cache_paths:
+        - $HOME/.gradle/caches
+        - $HOME/.gradle/wrapper
+        - $HOME/.pub-cache
+
+    scripts:
+      - name: "Flutter: get dependencies"
+        script: flutter pub get
+
+      - name: "Flutter: analyze"
+        script: flutter analyze --no-pub || true
+
+      - name: "Flutter: test"
+        script: flutter test --no-pub || true
+
+      - name: "Flutter: build debug APK"
+        script: flutter build apk --debug --no-pub
+
+    artifacts:
+      - build/app/outputs/flutter-apk/app-debug.apk

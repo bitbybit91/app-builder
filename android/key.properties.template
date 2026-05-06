@@ -1,0 +1,24 @@
+# Template for android/key.properties
+# ─────────────────────────────────────────────────────────────────────────────
+# This file is NOT committed to version control. It is generated automatically
+# by scripts/setup_signing.py during CI from Codemagic environment variables.
+#
+# For LOCAL development, copy this file to android/key.properties and fill in
+# your own values:
+#
+#   cp android/key.properties.template android/key.properties
+#
+# Then edit android/key.properties with your actual signing credentials.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Path to the keystore file, relative to android/app/
+storeFile=keystore.jks
+
+# Keystore password (set via CM_KEYSTORE_PASSWORD in Codemagic)
+storePassword=REPLACE_WITH_KEYSTORE_PASSWORD
+
+# Key alias (set via CM_KEY_ALIAS in Codemagic)
+keyAlias=REPLACE_WITH_KEY_ALIAS
+
+# Key password (set via CM_KEY_PASSWORD in Codemagic)
+keyPassword=REPLACE_WITH_KEY_PASSWORD
