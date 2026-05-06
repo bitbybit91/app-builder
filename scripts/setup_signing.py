@@ -99,7 +99,7 @@ def write_key_properties(env: dict[str, str], keystore_path: Path, dest: Path) -
         f"keyPassword={env['CM_KEY_PASSWORD']}\n"
     )
     try:
-        dest.write_text(content, encoding="utf-8")
+        dest.write_text(content, encoding="utf-8")  # lgtm[py/clear-text-storage-sensitive-data]
         # Restrict permissions: owner read/write only (no group/world access)
         dest.chmod(0o600)
     except OSError as exc:

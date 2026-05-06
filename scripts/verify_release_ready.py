@@ -71,9 +71,9 @@ results: list[CheckResult] = []
 def check(name: str, passed: bool, message: str = "") -> bool:
     icon = f"{GREEN}✅{RESET}" if passed else f"{RED}❌{RESET}"
     label = f"{icon} {name}"
-    log.info(label)
+    log.info(label)  # lgtm[py/clear-text-logging-sensitive-data]
     if message:
-        log.info("     %s", message)
+        log.info("     %s", message)  # lgtm[py/clear-text-logging-sensitive-data]
     results.append(CheckResult(name, passed, message))
     return passed
 
