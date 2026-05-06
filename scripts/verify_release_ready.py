@@ -71,9 +71,9 @@ results: list[CheckResult] = []
 def check(name: str, passed: bool, message: str = "") -> bool:
     icon = f"{GREEN}✅{RESET}" if passed else f"{RED}❌{RESET}"
     label = f"{icon} {name}"
-    if message:
-        label += f": {message}"
     log.info(label)
+    if message:
+        log.info("     %s", message)
     results.append(CheckResult(name, passed, message))
     return passed
 

@@ -100,6 +100,8 @@ def write_key_properties(env: dict[str, str], keystore_path: Path, dest: Path) -
     )
     try:
         dest.write_text(content, encoding="utf-8")
+        # Restrict permissions: owner read/write only (no group/world access)
+        dest.chmod(0o600)
     except OSError as exc:
         log.error("Failed to write key.properties to %s: %s", dest, exc)
         sys.exit(1)

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MagoraDeskApp());
+  runApp(const MagoradeskApp());
 }
 
-class MagoraDeskApp extends StatelessWidget {
-  const MagoraDeskApp({super.key});
+class MagoradeskApp extends StatelessWidget {
+  const MagoradeskApp({super.key});
 
   @override
   Widget build(BuildContext context) {
