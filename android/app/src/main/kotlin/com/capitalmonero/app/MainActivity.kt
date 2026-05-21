@@ -1,4 +1,4 @@
-package com.example.capitalmonero
+package com.capitalmonero.app
 
 import io.flutter.embedding.android.FlutterActivity
 
