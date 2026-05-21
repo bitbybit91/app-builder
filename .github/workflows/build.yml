@@ -2,7 +2,11 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main, copilot/scaffold-capitalmonero-project ]
+    branches:
+      - main
+      - 'copilot/scaffold-capitalmonero-project'
+      - 'copilot/copilotscaffold-capitalmonero-project'
+  workflow_dispatch:
 
 jobs:
   build:
