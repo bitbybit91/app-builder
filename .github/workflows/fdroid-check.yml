@@ -13,6 +13,8 @@ jobs:
   fdroid-lint:
     name: Validate F-Droid Metadata
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     container:
       image: registry.gitlab.com/fdroid/fdroidserver:buildserver
     steps:
