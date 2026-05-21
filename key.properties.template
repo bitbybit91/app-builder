@@ -1,0 +1,6 @@
+# Copy this file to key.properties and fill in your signing credentials.
+# NEVER commit key.properties to version control.
+storeFile=../release.keystore
+storePassword=FILL_IN
+keyAlias=FILL_IN
+keyPassword=FILL_IN

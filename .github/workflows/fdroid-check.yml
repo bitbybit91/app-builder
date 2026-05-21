@@ -1,0 +1,28 @@
+name: F-Droid Metadata Check
+
+on:
+  pull_request:
+    paths:
+      - 'metadata/**'
+      - '.github/workflows/fdroid-check.yml'
+  push:
+    paths:
+      - 'metadata/**'
+
+jobs:
+  fdroid-lint:
+    name: Validate F-Droid Metadata
+    runs-on: ubuntu-latest
+    container:
+      image: registry.gitlab.com/fdroid/fdroidserver:buildserver
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint F-Droid metadata
+        run: |
+          cd metadata
+          for yaml in *.yml; do
+            echo "Checking $yaml ..."
+            fdroid lint "$yaml" && echo "✓ $yaml OK" || echo "✗ $yaml FAILED"
+          done
+        continue-on-error: false

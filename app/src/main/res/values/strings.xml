@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">CapitalMonero</string>
+    <string name="home_title">CapitalMonero</string>
+    <string name="home_subtitle">Your Monero Companion</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_about">About</string>
+    <string name="about_title">About CapitalMonero</string>
+    <string name="about_description">CapitalMonero is a free and open-source Monero utility app. No tracking, no ads, no proprietary dependencies.</string>
+    <string name="version_label">Version</string>
+    <string name="content_description_logo">CapitalMonero logo</string>
+    <string name="error_network">Network unavailable. Please check your connection.</string>
+    <string name="error_generic">An unexpected error occurred.</string>
+    <string name="retry">Retry</string>
+    <string name="ok">OK</string>
+</resources>

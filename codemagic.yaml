@@ -1,0 +1,64 @@
+workflows:
+  android-release-apk:
+    name: Android Release APK
+    max_build_duration: 60
+    triggering:
+      events:
+        - push
+        - tag
+      branch_patterns:
+        - pattern: main
+          include: true
+        - pattern: master
+          include: true
+      tag_patterns:
+        - pattern: "v*.*.*"
+          include: true
+    environment:
+      java: 17
+      groups:
+        - release_signing
+      vars:
+        PACKAGE_NAME: com.capitalmonero.app
+    scripts:
+      - name: Set up signing
+        script: |
+          python3 scripts/setup_signing.py
+      - name: Run pre-flight checks
+        script: |
+          python3 scripts/verify_release_ready.py
+      - name: Cache Gradle
+        script: |
+          echo "Gradle cache managed by Codemagic"
+      - name: Run unit tests
+        script: |
+          ./gradlew test --stacktrace
+      - name: Run lint
+        script: |
+          ./gradlew lint --stacktrace
+      - name: Build release APK + AAB
+        script: |
+          ./gradlew clean assembleRelease bundleRelease --stacktrace
+    artifacts:
+      - app/build/outputs/apk/release/*.apk
+      - app/build/outputs/bundle/release/*.aab
+      - app/build/outputs/mapping/release/mapping.txt
+      - app/build/outputs/native-debug-symbols/release/native-debug-symbols.zip
+    publishing:
+      email:
+        recipients:
+          - $NOTIFICATION_EMAIL
+        notify:
+          success: true
+          failure: true
+      scripts:
+        - name: Notify Telegram (optional)
+          script: |
+            if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+              STATUS="✅ Build succeeded"
+              curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+                -d chat_id="${TELEGRAM_CHAT_ID}" \
+                -d text="${STATUS}: CapitalMonero ${FCI_BUILD_ID}"
+            else
+              echo "Telegram notifications not configured (TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID not set)"
+            fi

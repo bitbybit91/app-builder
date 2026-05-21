@@ -1,0 +1,21 @@
+# Gradle
+.gradle/
+build/
+**/build/
+*.iml
+
+# Android
+local.properties
+keys.properties
+*.keystore
+*.jks
+release.keystore
+
+# IDE
+.idea/
+!.idea/codeStyles/
+captures/
+*.hprof
+
+# Kotlin
+*.class
