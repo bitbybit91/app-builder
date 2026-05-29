@@ -1,0 +1,84 @@
+name: capitalmonero
+description: CapitalMonero - peer-to-peer cryptocurrency exchange for Monero and Bitcoin.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State management
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.7
+
+  # Routing
+  go_router: ^14.8.1
+
+  # Networking
+  dio: ^5.7.0
+
+  # Local storage
+  drift: ^2.23.0
+  shared_preferences: ^2.3.4
+  flutter_secure_storage: ^9.2.3
+  path_provider: ^2.1.5
+  path: ^1.9.1
+  sqlite3_flutter_libs: ^0.5.24
+
+  # Security / Crypto
+  pointycastle: ^3.9.1
+  bip39: ^1.0.6
+  crypto: ^3.0.5
+
+  # QR / Camera
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^6.0.2
+
+  # Auth / Biometrics
+  local_auth: ^2.3.0
+
+  # Firebase (excluded by fdroid flavor via conditional imports)
+  firebase_core: ^3.9.0
+  firebase_messaging: ^15.1.6
+
+  # Localization / Formatting
+  intl: ^0.20.2
+
+  # Annotations (codegen optional)
+  json_annotation: ^4.9.0
+  freezed_annotation: ^3.0.0
+
+  # DI
+  get_it: ^8.0.3
+  injectable: ^2.5.0
+
+  # Utilities
+  url_launcher: ^6.3.1
+  dartz: ^0.10.1
+  uuid: ^4.5.1
+  collection: ^1.19.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.4.14
+  freezed: ^3.0.0
+  json_serializable: ^6.9.0
+  drift_dev: ^2.23.0
+  injectable_generator: ^2.7.0
+  bloc_test: ^9.1.7
+  mocktail: ^1.0.4
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/images/
+    - assets/icons/

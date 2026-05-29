@@ -1,0 +1,34 @@
+default_platform(:ios)
+
+platform :ios do
+  desc 'Sync App Store provisioning profiles'
+  lane :sync_signing do
+    match(type: 'appstore', readonly: true)
+  end
+
+  desc 'Build CapitalMonero IPA'
+  lane :build do
+    sync_signing
+    sh 'cd .. && flutter build ipa --release --export-options-plist=ios/ExportOptions.plist'
+  end
+
+  desc 'Upload latest IPA to TestFlight'
+  lane :beta do
+    build
+    upload_to_testflight(
+      ipa: '../build/ios/ipa/capitalmonero.ipa',
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc 'Release to App Store'
+  lane :release do
+    build
+    upload_to_app_store(
+      ipa: '../build/ios/ipa/capitalmonero.ipa',
+      skip_screenshots: true,
+      skip_metadata: false,
+      submit_for_review: false
+    )
+  end
+end

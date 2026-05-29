@@ -1,0 +1,36 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "CapitalMonero (debug, physical device)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "debug",
+            "args": ["--no-pub", "--flavor", "production"]
+        },
+        {
+            "name": "CapitalMonero (profile, physical device)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "profile",
+            "args": ["--no-pub", "--flavor", "production"]
+        },
+        {
+            "name": "CapitalMonero F-Droid (debug, physical device)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "debug",
+            "args": ["--no-pub", "--flavor", "fdroid"]
+        },
+        {
+            "name": "All tests",
+            "request": "launch",
+            "type": "dart",
+            "program": "test/",
+            "args": ["--no-pub", "--reporter", "compact"]
+        }
+    ]
+}

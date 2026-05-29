@@ -1,0 +1,14 @@
+CapitalMonero is a peer-to-peer cryptocurrency marketplace that lets you buy
+and sell Monero (XMR) and Bitcoin (BTC) directly with other people.
+
+Highlights:
+* Online and local cash trades.
+* Bank transfer, SEPA, Revolut, Wise, cash and crypto payment methods.
+* Automated escrow, with three-way dispute resolution.
+* PGP-encrypted trade chat and direct messaging.
+* TOTP two-factor authentication and BIP39 recovery phrase.
+* On-device Monero and Bitcoin wallets with dynamic deposit addresses.
+* 12 fully translated languages.
+
+The F-Droid build excludes Google Firebase libraries and relies on in-app
+polling for new trade and message updates.

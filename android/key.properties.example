@@ -1,0 +1,17 @@
+# Copy this file to android/key.properties and fill in your real values.
+# This file is read by android/app/build.gradle to sign release builds.
+#
+# Generate a keystore with the JDK 17 keytool:
+#
+#   keytool -genkey -v -keystore C:\keys\capitalmonero-release.jks ^
+#       -alias capitalmonero-release ^
+#       -keyalg RSA -keysize 4096 -validity 10000
+#
+# Notes for Windows paths:
+#   * Use double backslashes OR forward slashes.
+#   * Keep the keystore OUTSIDE of the repository.
+
+storePassword=changeMeStrong
+keyPassword=changeMeStrong
+keyAlias=capitalmonero-release
+storeFile=C:\\keys\\capitalmonero-release.jks
