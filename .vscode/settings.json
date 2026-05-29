@@ -1,0 +1,26 @@
+{
+    "dart.analyzerAdditionalArgs": ["--max-analysis-workers=1"],
+    "dart.analysisServerFolding": false,
+    "dart.previewFlutterUiGuides": false,
+    "dart.openDevTools": "never",
+    "dart.runPubGetOnPubspecChanges": "prompt",
+    "dart.warnWhenEditingFilesOutsideWorkspace": false,
+    "editor.minimap.enabled": false,
+    "editor.formatOnSave": true,
+    "[dart]": {
+        "editor.defaultFormatter": "Dart-Code.dart-code"
+    },
+    "files.watcherExclude": {
+        "**/.dart_tool/**": true,
+        "**/build/**": true,
+        "**/.gradle/**": true,
+        "**/.pub-cache/**": true,
+        "**/ios/Pods/**": true,
+        "**/coverage/**": true
+    },
+    "search.exclude": {
+        "**/.dart_tool/**": true,
+        "**/build/**": true,
+        "**/.gradle/**": true
+    }
+}

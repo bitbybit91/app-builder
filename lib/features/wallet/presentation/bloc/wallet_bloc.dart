@@ -142,20 +142,23 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       destination: event.destination,
       amount: event.amount,
     );
-    result.fold(
-      (failure) => emit(WalletError(failure)),
-      (tx) async {
-        final balance = await _repository.getBalance(event.coin);
-        final WalletBalance? b = balance.fold((_) => null, (b) => b);
-        if (state is WalletLoaded && b != null) {
-          final loaded = state as WalletLoaded;
-          emit(loaded.copyWith(
-            balance: b,
-            history: <WalletTransaction>[tx, ...loaded.history],
-            lastWithdrawal: tx,
-          ));
-        }
-      },
+    if (result.isLeft()) {
+      emit(WalletError(result.fold((f) => f, (_) => const UnexpectedFailure())));
+      return;
+    }
+    final WalletTransaction tx = result.fold(
+      (_) => throw StateError('unreachable'),
+      (t) => t,
     );
+    final balance = await _repository.getBalance(event.coin);
+    final WalletBalance? b = balance.fold((_) => null, (b) => b);
+    if (state is WalletLoaded && b != null) {
+      final loaded = state as WalletLoaded;
+      emit(loaded.copyWith(
+        balance: b,
+        history: <WalletTransaction>[tx, ...loaded.history],
+        lastWithdrawal: tx,
+      ));
+    }
   }
 }

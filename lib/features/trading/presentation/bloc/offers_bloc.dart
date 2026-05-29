@@ -91,15 +91,14 @@ class OffersBloc extends Bloc<OffersEvent, OffersState> {
 
   Future<void> _onCreated(OfferCreated event, Emitter<OffersState> emit) async {
     final result = await _repository.createOffer(event.offer);
-    result.fold(
+    if (result.isLeft()) {
+      emit(OffersError(result.fold((f) => f, (_) => const UnexpectedFailure())));
+      return;
+    }
+    final reloaded = await _repository.listOffers(_lastQuery);
+    reloaded.fold(
       (failure) => emit(OffersError(failure)),
-      (Offer _) async {
-        final reloaded = await _repository.listOffers(_lastQuery);
-        reloaded.fold(
-          (failure) => emit(OffersError(failure)),
-          (List<Offer> offers) => emit(OffersLoaded(offers, query: _lastQuery)),
-        );
-      },
+      (List<Offer> offers) => emit(OffersLoaded(offers, query: _lastQuery)),
     );
   }
 }

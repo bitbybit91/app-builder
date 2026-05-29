@@ -1,0 +1,2 @@
+Initial release: P2P Monero & Bitcoin trading with escrow, PGP chat and
+on-device wallets.

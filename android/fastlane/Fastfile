@@ -1,0 +1,25 @@
+default_platform(:android)
+
+platform :android do
+  desc 'Build production AAB'
+  lane :bundle_production do
+    sh 'flutter build appbundle --release --flavor production'
+  end
+
+  desc 'Upload to Play Store (internal track)'
+  lane :deploy_internal do
+    sh 'flutter build appbundle --release --flavor production'
+    upload_to_play_store(
+      track: 'internal',
+      aab: '../build/app/outputs/bundle/productionRelease/app-production-release.aab',
+      skip_upload_apk: true,
+      skip_upload_metadata: false,
+      skip_upload_changelogs: false
+    )
+  end
+
+  desc 'Build F-Droid APK'
+  lane :build_fdroid do
+    sh 'flutter build apk --release --flavor fdroid'
+  end
+end

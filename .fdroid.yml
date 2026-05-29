@@ -1,0 +1,52 @@
+Categories:
+  - Money
+License: AGPL-3.0-or-later
+SourceCode: https://github.com/capitalmonero/capitalmonero
+IssueTracker: https://github.com/capitalmonero/capitalmonero/issues
+AutoName: CapitalMonero
+Summary: Peer-to-peer Monero and Bitcoin exchange
+Description: |-
+    CapitalMonero is an AgoraDesk/LocalMonero-style peer-to-peer marketplace
+    for trading Monero (XMR) and Bitcoin (BTC) directly with other users.
+
+    Features:
+      * Buy / sell offers (online and local cash trades)
+      * Multiple payment methods (SEPA, bank transfer, cash, crypto)
+      * Built-in escrow with dispute resolution
+      * Optional PGP-encrypted trade chat
+      * Two-factor authentication (TOTP) and BIP39 recovery phrase
+      * On-device Monero and Bitcoin wallets with QR deposit codes
+
+    The F-Droid build excludes proprietary Google Firebase libraries and
+    relies entirely on in-app polling for notifications.
+
+RepoType: git
+Repo: https://github.com/capitalmonero/capitalmonero.git
+
+Builds:
+  - versionName: '1.0.0-fdroid'
+    versionCode: 1
+    commit: main
+    subdir: .
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+    init:
+      - rm -rf $$flutter$$/.git
+    rm:
+      - android/app/google-services.json
+    prebuild:
+      - flutter pub get
+      - flutter gen-l10n
+    gradle:
+      - fdroid
+    build: |-
+      flutter build apk --release --flavor fdroid
+    output: build/app/outputs/flutter-apk/app-fdroid-release.apk
+    srclibs:
+      - flutter@stable
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.0-fdroid
+CurrentVersionCode: 1
