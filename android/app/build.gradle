@@ -1,0 +1,163 @@
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterRoot = localProperties.getProperty('flutter.sdk')
+if (flutterRoot == null) {
+    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in local.properties.")
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode') ?: '1'
+def flutterVersionName = localProperties.getProperty('flutter.versionName') ?: '1.0.0'
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace 'com.capitalmonero.app'
+    compileSdkVersion 34
+    ndkVersion flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        applicationId "com.capitalmonero.app"
+        minSdkVersion 21
+        targetSdkVersion 34
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+        multiDexEnabled true
+        resourceConfigurations += [
+            'en', 'es', 'fr', 'de', 'ko', 'zh',
+            'ja', 'pt', 'th', 'sv', 'da', 'no'
+        ]
+    }
+
+    // Cap R8 / dex heap so release builds finish on 4 GB RAM hosts.
+    dexOptions {
+        javaMaxHeapSize "768m"
+        preDexLibraries true
+        jumboMode true
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+
+    flavorDimensions "store"
+
+    productFlavors {
+        production {
+            dimension "store"
+            applicationIdSuffix ""
+            versionNameSuffix ""
+            manifestPlaceholders = [
+                appLabel: "CapitalMonero",
+                fcmEnabled: "true"
+            ]
+            buildConfigField "boolean", "ENABLE_FIREBASE", "true"
+            buildConfigField "String", "STORE_FLAVOR", '"production"'
+        }
+        staging {
+            dimension "store"
+            applicationIdSuffix ".staging"
+            versionNameSuffix "-staging"
+            manifestPlaceholders = [
+                appLabel: "CapitalMonero (Staging)",
+                fcmEnabled: "true"
+            ]
+            buildConfigField "boolean", "ENABLE_FIREBASE", "true"
+            buildConfigField "String", "STORE_FLAVOR", '"staging"'
+        }
+        fdroid {
+            dimension "store"
+            applicationIdSuffix ".fdroid"
+            versionNameSuffix "-fdroid"
+            manifestPlaceholders = [
+                appLabel: "CapitalMonero (F-Droid)",
+                fcmEnabled: "false"
+            ]
+            buildConfigField "boolean", "ENABLE_FIREBASE", "false"
+            buildConfigField "String", "STORE_FLAVOR", '"fdroid"'
+        }
+    }
+
+    buildTypes {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+
+    packagingOptions {
+        resources {
+            excludes += [
+                'META-INF/AL2.0',
+                'META-INF/LGPL2.1',
+                'META-INF/DEPENDENCIES',
+                'META-INF/LICENSE*',
+                'META-INF/NOTICE*'
+            ]
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.multidex:multidex:2.0.1'
+}
+
+// Apply Google services plugin only on flavors that ship Firebase.
+def isFirebaseEnabledFlavor(taskName) {
+    return taskName.contains('Production') || taskName.contains('Staging')
+}
+
+if (project.hasProperty('flavor') &&
+    (project.flavor == 'production' || project.flavor == 'staging')) {
+    apply plugin: 'com.google.gms.google-services'
+}
