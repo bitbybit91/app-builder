@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}Create Offer — P2P Exchange{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Create Offer</h1>
+</section>
+
+<form id="createOfferForm" class="form" onsubmit="submitOffer(event)">
+    <div class="form-row">
+        <div class="form-group">
+            <label for="offerType">I want to</label>
+            <select id="offerType" required>
+                <option value="sell">Sell XMR (buyers will come to you)</option>
+                <option value="buy">Buy XMR (sellers will come to you)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="fiatCurrency">Fiat Currency</label>
+            <select id="fiatCurrency" required>
+                <option value="USD">USD — US Dollar</option>
+                <option value="EUR">EUR — Euro</option>
+                <option value="GBP">GBP — British Pound</option>
+                <option value="CAD">CAD — Canadian Dollar</option>
+                <option value="AUD">AUD — Australian Dollar</option>
+                <option value="BRL">BRL — Brazilian Real</option>
+                <option value="CNY">CNY — Chinese Yuan</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="priceType">Pricing</label>
+            <select id="priceType" onchange="togglePriceField()">
+                <option value="market">Market rate +/- margin</option>
+                <option value="fixed">Fixed price</option>
+            </select>
+        </div>
+        <div class="form-group" id="marginGroup">
+            <label for="priceMargin">Margin (%)</label>
+            <input type="number" id="priceMargin" step="0.1" value="5" placeholder="e.g., 5 = 5% above market">
+        </div>
+        <div class="form-group" id="fixedPriceGroup" style="display:none;">
+            <label for="fixedPrice">Fixed Price (per XMR)</label>
+            <input type="number" id="fixedPrice" step="0.01" placeholder="e.g., 180.00">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="minAmount">Min Amount (fiat)</label>
+            <input type="number" id="minAmount" step="0.01" value="50" required>
+        </div>
+        <div class="form-group">
+            <label for="maxAmount">Max Amount (fiat)</label>
+            <input type="number" id="maxAmount" step="0.01" value="5000" required>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="paymentMethod">Payment Method</label>
+            <select id="paymentMethod" required>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="cash_in_person">Cash in Person</option>
+                <option value="paypal">PayPal</option>
+                <option value="revolut">Revolut</option>
+                <option value="wise">Wise</option>
+                <option value="zelle">Zelle</option>
+                <option value="venmo">Venmo</option>
+                <option value="gift_card">Gift Card</option>
+                <option value="crypto">Crypto</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="tradeTimeLimit">Trade Window (minutes)</label>
+            <input type="number" id="tradeTimeLimit" value="60" min="15" max="1440">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="paymentDetails">Payment Details</label>
+        <textarea id="paymentDetails" rows="3" placeholder="Describe your payment method details (visible to trade partners)"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="terms">Trade Terms</label>
+        <textarea id="terms" rows="3" placeholder="Any conditions or requirements for trading with you"></textarea>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="tradeType">Trade Type</label>
+            <select id="tradeType" onchange="toggleLocationField()">
+                <option value="online">Online</option>
+                <option value="local">Local (in-person)</option>
+            </select>
+        </div>
+        <div class="form-group" id="locationGroup" style="display:none;">
+            <label for="location">Location</label>
+            <input type="text" id="location" placeholder="City, Country">
+        </div>
+        <div class="form-group" id="countryGroup" style="display:none;">
+            <label for="country">Country Code</label>
+            <input type="text" id="country" maxlength="3" placeholder="US">
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-lg">Create Offer</button>
+        <a href="/offers" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+<div id="offerResult" style="display:none;" class="alert"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePriceField() {
+    const type = document.getElementById('priceType').value;
+    document.getElementById('marginGroup').style.display = type === 'market' ? '' : 'none';
+    document.getElementById('fixedPriceGroup').style.display = type === 'fixed' ? '' : 'none';
+}
+
+function toggleLocationField() {
+    const type = document.getElementById('tradeType').value;
+    const show = type === 'local';
+    document.getElementById('locationGroup').style.display = show ? '' : 'none';
+    document.getElementById('countryGroup').style.display = show ? '' : 'none';
+}
+
+function submitOffer(e) {
+    e.preventDefault();
+
+    if (!getSessionToken()) {
+        alert('You need to start a session first. Click "Start Trading" in the navbar.');
+        return;
+    }
+
+    const data = {
+        offer_type: document.getElementById('offerType').value,
+        fiat_currency: document.getElementById('fiatCurrency').value,
+        price_type: document.getElementById('priceType').value,
+        price_margin: parseFloat(document.getElementById('priceMargin').value) || 0,
+        fixed_price: document.getElementById('fixedPrice').value ? parseFloat(document.getElementById('fixedPrice').value) : null,
+        min_amount: parseFloat(document.getElementById('minAmount').value),
+        max_amount: parseFloat(document.getElementById('maxAmount').value),
+        payment_method: document.getElementById('paymentMethod').value,
+        payment_details: document.getElementById('paymentDetails').value,
+        terms: document.getElementById('terms').value,
+        trade_time_limit: parseInt(document.getElementById('tradeTimeLimit').value),
+        trade_type: document.getElementById('tradeType').value,
+        location: document.getElementById('location').value,
+        country: document.getElementById('country').value,
+    };
+
+    api('/api/offers', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    })
+    .then(result => {
+        const el = document.getElementById('offerResult');
+        el.style.display = 'block';
+        el.className = 'alert alert-success';
+        el.textContent = 'Offer created successfully!';
+        setTimeout(() => window.location.href = '/offers', 1500);
+    })
+    .catch(err => {
+        const el = document.getElementById('offerResult');
+        el.style.display = 'block';
+        el.className = 'alert alert-error';
+        el.textContent = err.message || 'Failed to create offer.';
+    });
+}
+</script>
+{% endblock %}

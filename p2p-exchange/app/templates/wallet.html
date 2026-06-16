@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Wallet — P2P Exchange{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Wallet</h1>
+</section>
+
+<div class="wallet-grid">
+    <div class="wallet-card">
+        <h3>XMR Balance</h3>
+        <div class="wallet-balance">
+            <span id="xmrBalance" class="balance-value">—</span>
+            <span class="balance-unit">XMR</span>
+        </div>
+        <p class="text-muted">Unlocked: <span id="xmrUnlocked">—</span> XMR</p>
+        <button class="btn btn-sm" onclick="refreshBalance()">Refresh</button>
+    </div>
+
+    <div class="wallet-card">
+        <h3>Deposit</h3>
+        <p>Generate a new deposit address:</p>
+        <button class="btn btn-primary" onclick="generateDeposit()">Generate Address</button>
+        <div id="depositAddress" style="display:none;" class="deposit-result">
+            <label>Send XMR to:</label>
+            <code id="depositAddrValue"></code>
+            <button class="btn btn-sm" onclick="copyAddress()">Copy</button>
+        </div>
+    </div>
+
+    <div class="wallet-card">
+        <h3>Withdraw</h3>
+        <form onsubmit="withdraw(event)">
+            <div class="form-group">
+                <label for="withdrawAddr">XMR Address</label>
+                <input type="text" id="withdrawAddr" placeholder="4..." required>
+            </div>
+            <div class="form-group">
+                <label for="withdrawAmount">Amount (XMR)</label>
+                <input type="number" id="withdrawAmount" step="0.000000000001" min="0.001" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Withdraw</button>
+        </form>
+        <div id="withdrawResult" style="display:none;" class="alert"></div>
+    </div>
+</div>
+
+<h2>Transaction History</h2>
+<div id="txHistory" class="tx-list">
+    <p class="loading">Loading transactions...</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    refreshBalance();
+    loadTransactions();
+});
+
+function refreshBalance() {
+    api('/api/wallet/balance')
+        .then(data => {
+            document.getElementById('xmrBalance').textContent = data.balance?.toFixed(12) || '0';
+            document.getElementById('xmrUnlocked').textContent = data.unlocked_balance?.toFixed(12) || '0';
+        })
+        .catch(() => {
+            document.getElementById('xmrBalance').textContent = 'Error';
+        });
+}
+
+function generateDeposit() {
+    api('/api/wallet/deposit', { method: 'POST' })
+        .then(data => {
+            document.getElementById('depositAddress').style.display = 'block';
+            document.getElementById('depositAddrValue').textContent = data.address;
+        })
+        .catch(err => alert(err.message || 'Failed to generate address'));
+}
+
+function copyAddress() {
+    const addr = document.getElementById('depositAddrValue').textContent;
+    navigator.clipboard.writeText(addr).then(() => alert('Address copied!'));
+}
+
+function withdraw(e) {
+    e.preventDefault();
+    const addr = document.getElementById('withdrawAddr').value;
+    const amount = parseFloat(document.getElementById('withdrawAmount').value);
+
+    api('/api/wallet/withdraw', {
+        method: 'POST',
+        body: JSON.stringify({ address: addr, amount: amount }),
+    })
+    .then(data => {
+        const el = document.getElementById('withdrawResult');
+        el.style.display = 'block';
+        el.className = 'alert alert-success';
+        el.textContent = `Sent! TX: ${data.tx_hash}`;
+    })
+    .catch(err => {
+        const el = document.getElementById('withdrawResult');
+        el.style.display = 'block';
+        el.className = 'alert alert-error';
+        el.textContent = err.message || 'Withdrawal failed';
+    });
+}
+
+function loadTransactions() {
+    api('/api/wallet/transactions')
+        .then(data => {
+            const container = document.getElementById('txHistory');
+            if (!data.transactions || data.transactions.length === 0) {
+                container.innerHTML = '<p class="text-muted">No transactions yet.</p>';
+                return;
+            }
+            container.innerHTML = data.transactions.map(tx => `
+                <div class="tx-row">
+                    <span class="tx-type badge badge-${tx.type}">${tx.type}</span>
+                    <span class="tx-amount">${tx.amount.toFixed(12)} XMR</span>
+                    <span class="tx-hash"><code>${tx.tx_hash.slice(0, 16)}...</code></span>
+                    <span class="tx-conf">${tx.confirmations} conf</span>
+                </div>
+            `).join('');
+        })
+        .catch(() => {
+            document.getElementById('txHistory').innerHTML = '<p class="text-muted">Failed to load transactions.</p>';
+        });
+}
+</script>
+{% endblock %}

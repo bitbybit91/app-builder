@@ -1,0 +1,59 @@
+# =============================================================================
+# Tor Hidden Service Configuration — P2P Exchange
+# =============================================================================
+# Install Tor:
+#   sudo apt install tor
+#
+# Add this content to /etc/tor/torrc (or include it via %include):
+#   sudo nano /etc/tor/torrc
+#
+# After configuration:
+#   sudo systemctl restart tor
+#   sudo cat /var/lib/tor/p2p-exchange/hostname
+#   → Your .onion address will be printed here
+# =============================================================================
+
+# ---- Hidden Service ----
+HiddenServiceDir /var/lib/tor/p2p-exchange/
+HiddenServicePort 80 127.0.0.1:8000
+HiddenServiceVersion 3
+
+# ---- Security Hardening ----
+# Only allow v3 onion services
+HiddenServiceVersion 3
+
+# ---- Optional: Single-hop mode for speed (reduces anonymity of the server) ----
+# Uncomment ONLY if you don't need server anonymity (e.g., you're already known):
+# HiddenServiceSingleHopMode 1
+# HiddenServiceNonAnonymousMode 1
+
+# ---- Optional: Client authorization (require key to access) ----
+# Generate client key: tor --keygen
+# HiddenServiceAuthorizeClient stealth client1,client2
+
+# ---- General Tor Settings ----
+SocksPort 0
+# Log notice file /var/log/tor/notices.log
+
+# =============================================================================
+# Deployment Steps:
+#
+# 1. Install Tor:
+#    sudo apt install tor
+#
+# 2. Add the hidden service config above to /etc/tor/torrc
+#
+# 3. Restart Tor:
+#    sudo systemctl restart tor
+#
+# 4. Get your .onion address:
+#    sudo cat /var/lib/tor/p2p-exchange/hostname
+#
+# 5. Set the ONION_ADDRESS in your .env file:
+#    ONION_ADDRESS=<your-address>.onion
+#
+# 6. The hidden service maps port 80 → 127.0.0.1:8000 (Gunicorn)
+#    No Apache needed for Tor-only deployment.
+#    For clearnet + Tor: Apache on port 80 proxies to Gunicorn on 8000,
+#    and Tor also proxies port 80 to 8000.
+# =============================================================================

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Offers — P2P Exchange{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Offers</h1>
+    <a href="/offers/create" class="btn btn-primary">+ Create Offer</a>
+</section>
+
+<div class="filters">
+    <div class="filter-group">
+        <label>Type</label>
+        <select id="filterType" onchange="loadOffers()">
+            <option value="">All</option>
+            <option value="buy">Buy XMR</option>
+            <option value="sell">Sell XMR</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Currency</label>
+        <select id="filterCurrency" onchange="loadOffers()">
+            <option value="">All</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+            <option value="CAD">CAD</option>
+            <option value="AUD">AUD</option>
+            <option value="BRL">BRL</option>
+            <option value="CNY">CNY</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Payment</label>
+        <select id="filterPayment" onchange="loadOffers()">
+            <option value="">All</option>
+            <option value="bank_transfer">Bank Transfer</option>
+            <option value="cash_in_person">Cash in Person</option>
+            <option value="paypal">PayPal</option>
+            <option value="revolut">Revolut</option>
+            <option value="wise">Wise</option>
+            <option value="zelle">Zelle</option>
+            <option value="venmo">Venmo</option>
+            <option value="gift_card">Gift Card</option>
+            <option value="crypto">Crypto</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Sort</label>
+        <select id="filterSort" onchange="loadOffers()">
+            <option value="newest">Newest</option>
+            <option value="trust">Highest Trust</option>
+            <option value="price_asc">Price ↑</option>
+            <option value="price_desc">Price ↓</option>
+        </select>
+    </div>
+</div>
+
+<div id="offersList" class="offers-list">
+    <p class="loading">Loading offers...</p>
+</div>
+
+<div class="pagination" id="pagination"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPage = 1;
+
+function loadOffers(page) {
+    currentPage = page || 1;
+    const type = document.getElementById('filterType').value;
+    const currency = document.getElementById('filterCurrency').value;
+    const payment = document.getElementById('filterPayment').value;
+    const sort = document.getElementById('filterSort').value;
+
+    let url = `/api/offers?page=${currentPage}&per_page=20&sort=${sort}`;
+    if (type) url += `&type=${type}`;
+    if (currency) url += `&currency=${currency}`;
+    if (payment) url += `&payment_method=${payment}`;
+
+    api(url)
+        .then(data => {
+            const container = document.getElementById('offersList');
+            if (!data.offers || data.offers.length === 0) {
+                container.innerHTML = '<p class="text-muted">No offers match your filters.</p>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+            container.innerHTML = data.offers.map(o => renderOfferCard(o)).join('');
+            renderPagination(data);
+        })
+        .catch(err => {
+            document.getElementById('offersList').innerHTML = '<p class="text-muted">Failed to load offers.</p>';
+        });
+}
+
+function renderPagination(data) {
+    const container = document.getElementById('pagination');
+    let html = '';
+    if (data.page > 1) {
+        html += `<button class="btn btn-sm" onclick="loadOffers(${data.page - 1})">← Prev</button> `;
+    }
+    html += `<span class="pagination-info">Page ${data.page} of ${data.pages} (${data.total} offers)</span>`;
+    if (data.has_next) {
+        html += ` <button class="btn btn-sm" onclick="loadOffers(${data.page + 1})">Next →</button>`;
+    }
+    container.innerHTML = html;
+}
+
+// Initialize from URL params
+document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('type')) document.getElementById('filterType').value = params.get('type');
+    if (params.get('currency')) document.getElementById('filterCurrency').value = params.get('currency');
+    loadOffers();
+});
+</script>
+{% endblock %}

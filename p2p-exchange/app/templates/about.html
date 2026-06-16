@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}About — P2P Exchange{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>About P2P Exchange</h1>
+</section>
+
+<div class="about-content">
+    <h2>What is this?</h2>
+    <p>
+        P2P Exchange is a no-KYC, non-custodial peer-to-peer platform for trading
+        Monero (XMR). It allows users to buy and sell XMR directly with each other
+        using any fiat payment method, without requiring identity verification,
+        registration, or centralized custody of funds.
+    </p>
+
+    <h2>How does it work?</h2>
+    <ol>
+        <li><strong>Create or browse offers</strong> — Sellers post offers with their price, payment methods, and terms.</li>
+        <li><strong>Initiate a trade</strong> — A buyer finds an offer and starts a trade.</li>
+        <li><strong>Escrow</strong> — The seller sends XMR to an escrow address. The platform verifies the on-chain deposit.</li>
+        <li><strong>Fiat payment</strong> — The buyer sends fiat to the seller via the agreed payment method.</li>
+        <li><strong>Release</strong> — The seller confirms receipt and the escrowed XMR is released to the buyer.</li>
+        <li><strong>Dispute</strong> — If there's a problem, either party can open a dispute for arbitration.</li>
+    </ol>
+
+    <h2>Security</h2>
+    <ul>
+        <li>🔒 <strong>No KYC</strong> — No registration, no email, no phone, no ID documents.</li>
+        <li>🔑 <strong>Non-custodial</strong> — The platform never holds private keys.</li>
+        <li>💬 <strong>E2E encrypted chat</strong> — All messages are encrypted client-side with NaCl box.</li>
+        <li>🧅 <strong>Tor-friendly</strong> — No CDN, no external scripts, no tracking.</li>
+        <li>🪙 <strong>Mnemonic backup</strong> — Optionally back up your identity with a 12-word BIP39 mnemonic.</li>
+    </ul>
+
+    <h2>Privacy</h2>
+    <p>
+        This platform is designed to protect your privacy. We do not collect or store
+        any personal information. Session tokens are HMAC-hashed before storage.
+        Chat messages are encrypted end-to-end — the server stores only ciphertext.
+    </p>
+
+    <h2>Technology</h2>
+    <ul>
+        <li>Backend: Python (Flask)</li>
+        <li>Frontend: Vanilla HTML/CSS/JavaScript — no heavy frameworks</li>
+        <li>Encryption: X25519 + XChaCha20-Poly1305 (NaCl/libsodium)</li>
+        <li>Identity: BIP39 mnemonic → X25519 keypair</li>
+        <li>Network: Monero RPC (configurable supernode architecture)</li>
+    </ul>
+</div>
+{% endblock %}

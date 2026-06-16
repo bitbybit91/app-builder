@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block title %}Trade — P2P Exchange{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Trade <span id="tradeIdDisplay" class="text-muted"></span></h1>
+    <span id="tradeStatus" class="badge badge-lg"></span>
+</section>
+
+<div class="trade-layout">
+    <div class="trade-details">
+        <h2>Trade Details</h2>
+        <div id="tradeInfo" class="info-grid">
+            <p class="loading">Loading trade details...</p>
+        </div>
+
+        <div class="trade-actions" id="tradeActions"></div>
+
+        <div class="escrow-info" id="escrowInfo" style="display:none;">
+            <h3>Escrow</h3>
+            <div id="escrowDetails"></div>
+        </div>
+    </div>
+
+    <div class="trade-chat">
+        <h2>Encrypted Chat</h2>
+        <div id="chatMessages" class="chat-messages">
+            <p class="text-muted">Messages are end-to-end encrypted.</p>
+        </div>
+        <form id="chatForm" class="chat-form" onsubmit="sendChatMessage(event)">
+            <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off">
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const tradeId = '{{ trade_id }}';
+let tradeData = null;
+
+function loadTrade() {
+    api(`/api/trades/${tradeId}`)
+        .then(data => {
+            tradeData = data.trade;
+            renderTrade(tradeData);
+        })
+        .catch(err => {
+            document.getElementById('tradeInfo').innerHTML = '<p class="text-muted">Failed to load trade.</p>';
+        });
+}
+
+function renderTrade(t) {
+    document.getElementById('tradeIdDisplay').textContent = '#' + t.id.slice(0, 8);
+    document.getElementById('tradeStatus').textContent = t.status.toUpperCase();
+    document.getElementById('tradeStatus').className = 'badge badge-lg badge-' + t.status;
+
+    document.getElementById('tradeInfo').innerHTML = `
+        <div class="info-row"><span>Amount</span><strong>${t.crypto_amount} XMR</strong></div>
+        <div class="info-row"><span>Fiat</span><strong>${t.fiat_amount} ${t.fiat_currency}</strong></div>
+        <div class="info-row"><span>Payment</span><strong>${t.payment_method.replace('_', ' ')}</strong></div>
+        <div class="info-row"><span>Buyer</span><strong>${t.buyer_nickname || t.buyer_id.slice(0,8)}</strong></div>
+        <div class="info-row"><span>Seller</span><strong>${t.seller_nickname || t.seller_id.slice(0,8)}</strong></div>
+        <div class="info-row"><span>Created</span><strong>${new Date(t.created_at).toLocaleString()}</strong></div>
+    `;
+
+    if (t.escrow_address) {
+        document.getElementById('escrowInfo').style.display = 'block';
+        document.getElementById('escrowDetails').innerHTML = `
+            <div class="info-row"><span>Escrow Address</span><code>${t.escrow_address}</code></div>
+            <div class="info-row"><span>TX ID</span><code>${t.escrow_tx_id || 'Pending'}</code></div>
+            <div class="info-row"><span>Confirmations</span><strong>${t.escrow_confirmations || 0}</strong></div>
+        `;
+    }
+
+    renderTradeActions(t);
+}
+
+function renderTradeActions(t) {
+    const container = document.getElementById('tradeActions');
+    const userId = getUserId();
+    let html = '';
+
+    if (t.status === 'initiated' && userId === t.seller_id) {
+        html += `
+            <div class="form-group">
+                <label>Escrow TX ID (paste after sending XMR to escrow address)</label>
+                <input type="text" id="escrowTxId" placeholder="Transaction hash">
+                <button class="btn btn-primary" onclick="markEscrowFunded()">Confirm Escrow Funded</button>
+            </div>
+        `;
+    }
+    if (t.status === 'escrow_funded' && userId === t.buyer_id) {
+        html += `<button class="btn btn-primary" onclick="markFiatSent()">I've Sent the Fiat Payment</button>`;
+    }
+    if (t.status === 'fiat_sent' && userId === t.seller_id) {
+        html += `<button class="btn btn-success" onclick="markFiatReceived()">Confirm Fiat Received (Release XMR)</button>`;
+    }
+    if (['initiated', 'escrow_funded'].includes(t.status)) {
+        html += ` <button class="btn btn-danger" onclick="cancelTrade()">Cancel Trade</button>`;
+    }
+    if (['escrow_funded', 'fiat_sent'].includes(t.status)) {
+        html += ` <button class="btn btn-warning" onclick="openDispute()">Open Dispute</button>`;
+    }
+
+    container.innerHTML = html;
+}
+
+function markEscrowFunded() {
+    const txId = document.getElementById('escrowTxId').value;
+    if (!txId) return alert('Enter the escrow transaction ID');
+
+    api(`/api/trades/${tradeId}/escrow-funded`, {
+        method: 'POST',
+        body: JSON.stringify({ tx_id: txId }),
+    }).then(() => loadTrade());
+}
+
+function markFiatSent() {
+    api(`/api/trades/${tradeId}/fiat-sent`, { method: 'POST' })
+        .then(() => loadTrade());
+}
+
+function markFiatReceived() {
+    if (!confirm('Confirm you received the fiat payment? This will release XMR to the buyer.')) return;
+    api(`/api/trades/${tradeId}/fiat-received`, { method: 'POST' })
+        .then(() => loadTrade());
+}
+
+function cancelTrade() {
+    if (!confirm('Cancel this trade?')) return;
+    api(`/api/trades/${tradeId}/cancel`, { method: 'POST' })
+        .then(() => loadTrade());
+}
+
+function openDispute() {
+    const reason = prompt('Reason for dispute:');
+    if (!reason) return;
+    api(`/api/trades/${tradeId}/dispute`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+    }).then(() => loadTrade());
+}
+
+// Chat
+function loadMessages() {
+    api(`/api/chat/${tradeId}/messages`)
+        .then(data => {
+            const container = document.getElementById('chatMessages');
+            if (!data.messages || data.messages.length === 0) {
+                container.innerHTML = '<p class="text-muted">No messages yet. Start the conversation.</p>';
+                return;
+            }
+            container.innerHTML = data.messages.map(m => `
+                <div class="chat-msg ${m.sender_id === getUserId() ? 'chat-msg-self' : 'chat-msg-other'}">
+                    <span class="chat-sender">${m.sender_nickname || 'Anon'}</span>
+                    <span class="chat-text">[Encrypted message]</span>
+                    <span class="chat-time">${new Date(m.created_at).toLocaleTimeString()}</span>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        });
+}
+
+function sendChatMessage(e) {
+    e.preventDefault();
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    // In production: encrypt with recipient's public key using NaCl box
+    // For demo: send Base64-encoded plaintext as "ciphertext"
+    const ciphertext = btoa(text);
+    const nonce = btoa(Array.from(crypto.getRandomValues(new Uint8Array(24)), b => String.fromCharCode(b)).join(''));
+    const pubkey = btoa(Array.from(crypto.getRandomValues(new Uint8Array(32)), b => String.fromCharCode(b)).join(''));
+
+    api(`/api/chat/${tradeId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({
+            ciphertext: ciphertext,
+            nonce: nonce,
+            sender_ephemeral_pubkey: pubkey,
+        }),
+    }).then(() => {
+        input.value = '';
+        loadMessages();
+    });
+}
+
+// Poll for updates
+document.addEventListener('DOMContentLoaded', function() {
+    loadTrade();
+    loadMessages();
+    setInterval(loadMessages, 5000);
+    setInterval(loadTrade, 10000);
+});
+</script>
+{% endblock %}

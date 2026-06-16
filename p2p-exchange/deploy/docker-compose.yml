@@ -1,0 +1,79 @@
+# =============================================================================
+# Docker Compose — P2P Exchange
+# =============================================================================
+# Usage:
+#   docker compose -f deploy/docker-compose.yml up -d
+#   docker compose -f deploy/docker-compose.yml logs -f
+#   docker compose -f deploy/docker-compose.yml down
+# =============================================================================
+
+services:
+  # ---- Web Application ----
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: p2p-exchange-web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://p2p:p2p_secret@db:5432/p2p_exchange
+    volumes:
+      - app-data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - p2p-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ---- PostgreSQL Database ----
+  db:
+    image: postgres:16-alpine
+    container_name: p2p-exchange-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: p2p_exchange
+      POSTGRES_USER: p2p
+      POSTGRES_PASSWORD: p2p_secret
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - p2p-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U p2p -d p2p_exchange"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- Tor Hidden Service (optional) ----
+  tor:
+    image: goldy/tor-hidden-service:latest
+    container_name: p2p-exchange-tor
+    restart: unless-stopped
+    environment:
+      P2P_EXCHANGE_TOR_SERVICE_HOSTS: "80:web:8000"
+      P2P_EXCHANGE_TOR_SERVICE_VERSION: "3"
+    volumes:
+      - tor-keys:/var/lib/tor/hidden_service
+    depends_on:
+      - web
+    networks:
+      - p2p-network
+
+volumes:
+  app-data:
+  db-data:
+  tor-keys:
+
+networks:
+  p2p-network:
+    driver: bridge
