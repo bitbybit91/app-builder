@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}P2P XMR Exchange - No KYC Monero Trading{% endblock %}
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Trade Monero<br><span class="accent">Privately &amp; Freely</span></h1>
+        <p class="hero-subtitle">No KYC. No custodian. End-to-end encrypted. Any payment method.</p>
+        <div class="hero-actions">
+            <a href="/offers?type=sell" class="btn btn-primary btn-lg">Buy XMR</a>
+            <a href="/offers?type=buy" class="btn btn-secondary btn-lg">Sell XMR</a>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <h2 class="section-title">Why P2P XMR Exchange?</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>No KYC</h3>
+                <p>Trade with a BIP39 mnemonic. No email. No phone. No identity documents.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔑</div>
+                <h3>Non-Custodial</h3>
+                <p>Escrow is on-chain. Only you hold your keys. We never touch your funds.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>E2E Encrypted Chat</h3>
+                <p>Trade messages are encrypted with X25519+XChaCha20. Only you and your counterparty can read them.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧅</div>
+                <h3>Tor Compatible</h3>
+                <p>Works as a Tor hidden service (.onion). No CDN. No external resources. 100% self-hosted.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💱</div>
+                <h3>Any Payment Method</h3>
+                <p>Bank transfer, cash, mobile money, crypto, gift cards — any method traders agree on.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⭐</div>
+                <h3>Reputation System</h3>
+                <p>Build trust through successful trades. New → Bronze → Silver → Gold → Platinum.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <div class="container">
+        <h2 class="section-title">How It Works</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Generate Your Identity</h3>
+                <p>Generate a BIP39 mnemonic. This is your identity and private key. Save it securely.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Browse Offers</h3>
+                <p>Find buy or sell offers filtered by payment method, currency, and country.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Initiate Trade</h3>
+                <p>Click trade. Seller locks XMR in escrow. Buyer sends fiat payment.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Confirm &amp; Complete</h3>
+                <p>Seller confirms fiat received. Escrow releases XMR to buyer automatically.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="latest-offers">
+    <div class="container">
+        <h2 class="section-title">Latest Offers</h2>
+        <div id="latest-offers-list" class="offer-list">
+            <p class="loading">Loading offers...</p>
+        </div>
+        <div class="text-center mt-4">
+            <a href="/offers" class="btn btn-secondary">View All Offers</a>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    App.api.getOffers({per_page: 6}).then(function(data) {
+        var container = document.getElementById('latest-offers-list');
+        if (data.offers && data.offers.length > 0) {
+            container.innerHTML = data.offers.map(App.render.offerCard).join('');
+        } else {
+            container.innerHTML = '<p class="empty-state">No offers yet. <a href="/create-offer">Create the first one!</a></p>';
+        }
+    }).catch(function() {
+        document.getElementById('latest-offers-list').innerHTML = '<p class="error">Failed to load offers.</p>';
+    });
+});
+</script>
+{% endblock %}

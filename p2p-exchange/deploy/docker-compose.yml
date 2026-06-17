@@ -1,0 +1,57 @@
+version: '3.9'
+
+services:
+  web:
+    build: ..
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - ../.env
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://p2puser:${POSTGRES_PASSWORD}@db:5432/p2pexchange
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - app_logs:/app/logs
+    networks:
+      - p2p_net
+
+  db:
+    image: postgres:14-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=p2pexchange
+      - POSTGRES_USER=p2puser
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U p2puser -d p2pexchange"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - p2p_net
+
+  tor:
+    image: torproject/tor:latest
+    restart: unless-stopped
+    volumes:
+      - tor_data:/var/lib/tor
+      - ./torrc:/etc/tor/torrc:ro
+    networks:
+      - p2p_net
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+  app_logs:
+  tor_data:
+
+networks:
+  p2p_net:
+    driver: bridge

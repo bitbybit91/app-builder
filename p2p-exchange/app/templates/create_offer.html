@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Create Offer - P2P XMR Exchange{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Create Offer</h1>
+</div>
+
+<div class="card form-card">
+    <form id="create-offer-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Offer Type *</label>
+                <select name="type" id="offer-type" class="form-control" required>
+                    <option value="sell">Sell XMR (I want fiat)</option>
+                    <option value="buy">Buy XMR (I have fiat)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Fiat Currency *</label>
+                <input type="text" name="fiat_currency" id="fiat-currency" class="form-control" placeholder="USD" required maxlength="10">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Payment Method *</label>
+            <input type="text" name="payment_method" id="payment-method" class="form-control" placeholder="Bank transfer, PayPal, Cash, etc." required maxlength="100">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Price Type</label>
+                <select name="price_type" id="price-type" class="form-control">
+                    <option value="market">Market Price</option>
+                    <option value="fixed">Fixed Price</option>
+                </select>
+            </div>
+            <div class="form-group" id="price-field" style="display:none;">
+                <label>Fixed Price (fiat per XMR)</label>
+                <input type="number" name="price" id="price" class="form-control" placeholder="150.00" min="0" step="0.01">
+            </div>
+            <div class="form-group" id="margin-field">
+                <label>Margin % (above/below market)</label>
+                <input type="number" name="margin_percent" id="margin-percent" class="form-control" placeholder="0" min="-50" max="50" step="0.1" value="0">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Min Amount (fiat) *</label>
+                <input type="number" name="min_amount" id="min-amount" class="form-control" placeholder="10" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label>Max Amount (fiat) *</label>
+                <input type="number" name="max_amount" id="max-amount" class="form-control" placeholder="1000" min="0" step="0.01" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Country / Region</label>
+            <input type="text" name="country" id="country" class="form-control" placeholder="United States" maxlength="100">
+        </div>
+        <div class="form-group">
+            <label>Trade Terms</label>
+            <textarea name="terms" id="terms" class="form-control" rows="4" placeholder="Describe your payment window, requirements, and any other terms..." maxlength="2000"></textarea>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg">Create Offer</button>
+            <a href="/offers" class="btn btn-secondary btn-lg">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('price-type').addEventListener('change', function() {
+    var isFixed = this.value === 'fixed';
+    document.getElementById('price-field').style.display = isFixed ? 'block' : 'none';
+    document.getElementById('margin-field').style.display = isFixed ? 'none' : 'block';
+});
+
+document.getElementById('create-offer-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var session = App.session.get();
+    if (!session) {
+        App.flash('Please connect your wallet first.', 'error');
+        return;
+    }
+    var data = {
+        type: document.getElementById('offer-type').value,
+        fiat_currency: document.getElementById('fiat-currency').value.toUpperCase(),
+        payment_method: document.getElementById('payment-method').value,
+        price_type: document.getElementById('price-type').value,
+        margin_percent: parseFloat(document.getElementById('margin-percent').value) || 0,
+        min_amount: parseFloat(document.getElementById('min-amount').value),
+        max_amount: parseFloat(document.getElementById('max-amount').value),
+        terms: document.getElementById('terms').value,
+        country: document.getElementById('country').value,
+    };
+    if (data.price_type === 'fixed') {
+        data.price = parseFloat(document.getElementById('price').value);
+    }
+    App.api.createOffer(data).then(function(offer) {
+        App.flash('Offer created successfully!', 'success');
+        setTimeout(function() { window.location.href = '/offers'; }, 1000);
+    }).catch(function(err) {
+        App.flash('Failed to create offer: ' + (err.message || 'Unknown error'), 'error');
+    });
+});
+</script>
+{% endblock %}

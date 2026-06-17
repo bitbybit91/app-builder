@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Profile - P2P XMR Exchange{% endblock %}
+{% block content %}
+<div class="profile-page">
+    <div id="profile-content">Loading...</div>
+</div>
+<script>
+var userId = {{ user_id }};
+document.addEventListener('DOMContentLoaded', function() {
+    App.api.getUser(userId).then(function(user) {
+        var levelColors = {new:'#888',bronze:'#cd7f32',silver:'#c0c0c0',gold:'#ffd700',platinum:'#e5e4e2'};
+        var level = user.trust_level || 'new';
+        document.getElementById('profile-content').innerHTML =
+            '<div class="profile-card card">' +
+            '<div class="profile-header">' +
+            '<div class="profile-avatar">' + (user.display_name || 'A')[0].toUpperCase() + '</div>' +
+            '<div class="profile-info">' +
+            '<h2>' + (user.display_name || 'Anonymous') + '</h2>' +
+            '<span class="trust-badge" style="background:' + (levelColors[level]||'#888') + '">' + level.toUpperCase() + '</span>' +
+            '</div></div>' +
+            '<div class="profile-stats">' +
+            '<div class="stat"><div class="stat-value">' + user.total_trades + '</div><div class="stat-label">Total Trades</div></div>' +
+            '<div class="stat"><div class="stat-value">' + user.successful_trades + '</div><div class="stat-label">Successful</div></div>' +
+            '<div class="stat"><div class="stat-value">' + (user.reputation_score || 0).toFixed(1) + '</div><div class="stat-label">Reputation</div></div>' +
+            '</div>' +
+            '<div class="profile-key"><strong>Public Key:</strong><br><code class="mono">' + user.public_key + '</code></div>' +
+            '<div class="profile-since">Member since: ' + new Date(user.created_at).toLocaleDateString() + '</div>' +
+            '</div>';
+    }).catch(function() {
+        document.getElementById('profile-content').innerHTML = '<p class="error">User not found.</p>';
+    });
+});
+</script>
+{% endblock %}
